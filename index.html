@@ -251,6 +251,7 @@
 
   var STORE_KEY    = "signin106_state_v1";
   var PASSWORD     = "135790abcdeF!";
+  var ADMIN_ALIAS  = "孙昊";       // 隐藏入口2：签到框里输入这个名字也进入管理验证
   var LOCK_MS      = 3000;
   var PREFIX       = "26008106";   // 完整学号 = PREFIX + 后两位
 
@@ -450,7 +451,9 @@
   function updateHint() {
     var v = entry.value.trim();
     if (!state.enabled) { hint.innerHTML = "签到已关闭"; return; }
-    if (!v) { hint.innerHTML = "学号只需输入后两位，例如：<b>05</b>（也可写 5）；姓名可直接输入，例如：陈锡美"; return; }
+    var DEFAULT_HINT = "学号只需输入后两位，例如：<b>05</b>（也可写 5）；姓名可直接输入，例如：陈锡美";
+    if (!v) { hint.innerHTML = DEFAULT_HINT; return; }
+    if (ADMIN_ALIAS.indexOf(v) === 0) { hint.innerHTML = DEFAULT_HINT; return; }
     if (/^\d+$/.test(v)) {
       var two = v.length >= 2 ? v.slice(-2) : ("0" + v);
       var s = null;
@@ -473,6 +476,13 @@
   }
 
   function submit() {
+    var raw0 = String(entry.value || "").trim();
+    if (raw0 === ADMIN_ALIAS) {          // 隐藏入口2：签到框输入该名字 → 进入管理验证
+      entry.value = "";
+      updateHint();
+      openPassScreen();
+      return;
+    }
     if (lockActive()) return;
     if (!state.enabled) { toast("签到已关闭"); return; }
     var raw = entry.value;
