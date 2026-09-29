@@ -250,8 +250,8 @@
   "use strict";
 
   var STORE_KEY    = "signin106_state_v1";
-  var PASSWORD     = "135790abcdeF!";
-  var ADMIN_ALIAS  = "孙昊";       // 隐藏入口2：签到框里输入这个名字也进入管理验证
+  var PASSWORDS    = ["135790abcdeF!", "guojunkai"];   // 管理密码，任一可用
+  var ADMIN_ALIASES= ["孙昊", "我是班长"];              // 隐藏入口2：签到框里输入这些名字也进入管理验证
   var LOCK_MS      = 3000;
   var PREFIX       = "26008106";   // 完整学号 = PREFIX + 后两位
 
@@ -453,7 +453,7 @@
     if (!state.enabled) { hint.innerHTML = "签到已关闭"; return; }
     var DEFAULT_HINT = "学号只需输入后两位，例如：<b>05</b>（也可写 5）；姓名可直接输入，例如：陈锡美";
     if (!v) { hint.innerHTML = DEFAULT_HINT; return; }
-    if (ADMIN_ALIAS.indexOf(v) === 0) { hint.innerHTML = DEFAULT_HINT; return; }
+    if (isAliasPrefix(v)) { hint.innerHTML = DEFAULT_HINT; return; }
     if (/^\d+$/.test(v)) {
       var two = v.length >= 2 ? v.slice(-2) : ("0" + v);
       var s = null;
@@ -477,7 +477,7 @@
 
   function submit() {
     var raw0 = String(entry.value || "").trim();
-    if (raw0 === ADMIN_ALIAS) {          // 隐藏入口2：签到框输入该名字 → 进入管理验证
+    if (isAdminAlias(raw0)) {            // 隐藏入口2：签到框输入暗号 → 进入管理验证
       entry.value = "";
       updateHint();
       openPassScreen();
@@ -508,6 +508,26 @@
   }
 
   // ---------- 密码 ----------
+  function checkPass(v) {
+    var s = String(v == null ? "" : v).trim();
+    for (var i = 0; i < PASSWORDS.length; i++) {
+      if (s === PASSWORDS[i] || s.toLowerCase() === PASSWORDS[i].toLowerCase()) return true;
+    }
+    return false;
+  }
+
+  function isAdminAlias(v) {
+    var s = String(v == null ? "" : v).trim();
+    for (var i = 0; i < ADMIN_ALIASES.length; i++) { if (s === ADMIN_ALIASES[i]) return true; }
+    return false;
+  }
+
+  function isAliasPrefix(v) {
+    var s = String(v == null ? "" : v);
+    for (var i = 0; i < ADMIN_ALIASES.length; i++) { if (ADMIN_ALIASES[i].indexOf(s) === 0) return true; }
+    return false;
+  }
+
   function openPassScreen() {
     $("pass-input").value = "";
     $("pass-hint").innerHTML = "";
@@ -517,7 +537,7 @@
 
   function passOk() {
     var v = $("pass-input").value;
-    if (v === PASSWORD) {
+    if (checkPass(v)) {
       $("pass-input").value = "";
       show(viewAdmin);
       renderAdmin();
@@ -540,7 +560,7 @@
   }
   function pwClose() { $("pwmodal").hidden = true; pwCb = null; }
   function pwOk() {
-    if ($("pw-input").value === PASSWORD) {
+    if (checkPass($("pw-input").value)) {
       var cb = pwCb;
       pwClose();
       if (cb) cb();
