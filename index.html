@@ -135,7 +135,7 @@
       <div class="input-label">签到输入 <small>（数字＝学号后两位，汉字＝姓名）</small></div>
       <input id="entry" type="text" inputmode="text" autocomplete="off" autocorrect="off"
              autocapitalize="off" spellcheck="false" placeholder="学号后两位 / 姓名" maxlength="20">
-      <div class="hint" id="hint">学号只需输入后两位，例如：<b>05</b>（也可写 5）</div>
+      <div class="hint" id="hint">学号只需输入后两位，例如：<b>06</b>（也可写 6）</div>
       <button class="btn block" id="btn-sign">签 到</button>
     </div>
 
@@ -463,7 +463,7 @@
   function updateHint() {
     var v = entry.value.trim();
     if (!state.enabled) { hint.innerHTML = "签到已关闭"; return; }
-    var DEFAULT_HINT = "学号只需输入后两位，例如：<b>05</b>（也可写 5）；姓名可直接输入，例如：陈锡美";
+    var DEFAULT_HINT = "学号只需输入后两位，例如：<b>06</b>（也可写 6）；姓名可直接输入，例如：陈锡美";
     if (!v) { hint.innerHTML = DEFAULT_HINT; return; }
     if (isAliasPrefix(v)) { hint.innerHTML = DEFAULT_HINT; return; }
     if (/^\d+$/.test(v)) {
