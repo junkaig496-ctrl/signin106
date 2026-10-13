@@ -226,7 +226,7 @@
   <div class="checkmark">✓</div>
   <div class="lock-say" id="lock-say">签到成功</div>
   <div class="lock-name" id="lock-name">—</div>
-  <div class="lock-cd">请在 <b id="lock-cd">3</b> 秒后再输入下一位</div>
+  <div class="lock-cd">请在 <b id="lock-cd">2</b> 秒后再输入下一位</div>
 </div>
 
 <!-- 密码弹窗（管理界面内二次验证） -->
@@ -252,12 +252,14 @@
   var STORE_KEY    = "signin106_state_v1";
   var PASSWORDS    = ["135790abcdeF!", "guojunkai", "我真的是班长"];   // 管理密码，任一可用
   var ADMIN_ALIASES= ["孙昊", "我是班长"];              // 隐藏入口2：签到框里输入这些名字也进入管理验证
-  var LOCK_MS      = 3000;
+  var LOCK_MS      = 2000;                             // 两次签到间隔（毫秒）
   var PREFIX       = "26008106";   // 完整学号 = PREFIX + 后两位
+  var ROSTER_VER   = 2;            // 名单版本，改动名单就 +1
+  var STRIP_BY_VER = { 2: ["05"] }; // 各版本要从旧存档里剔除的学号后两位（v2：删 05 林春叶）
 
-  // 名单：已按要求去除 02、16 两位同学（id 为学号后两位）
+  // 名单：已按要求去除 02、16、05 三位同学（id 为学号后两位）
   var SEED = [
-    ["01","陈锡美"],["03","黄尚玲"],["04","李昕逾"],["05","林春叶"],["06","卢睿馨"],
+    ["01","陈锡美"],["03","黄尚玲"],["04","李昕逾"],["06","卢睿馨"],
     ["07","韦理静"],["08","谢春盈"],["09","张凤梅"],["10","邓云麒"],["11","杜云翔"],
     ["12","冯子豪"],["13","郭峻恺"],["14","黄宸裕"],["15","黄绵欢"],["17","赖远航"],
     ["18","李子睿"],["19","梁宏瑞"],["20","刘成键"],["21","刘嘉佑"],["22","刘卓霖"],
@@ -278,10 +280,20 @@
     var s = null;
     try { s = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch (e) { s = null; }
     if (!s || !Array.isArray(s.students)) {
-      s = { enabled: true, lockUntil: 0, students: seedStudents() };
+      s = { enabled: true, lockUntil: 0, students: seedStudents(), ver: ROSTER_VER };
     }
     if (typeof s.enabled !== "boolean") s.enabled = true;
     if (typeof s.lockUntil !== "number") s.lockUntil = 0;
+    // 名单版本迁移：从旧存档里剔除已离开班级的同学
+    if (typeof s.ver !== "number") s.ver = 1;
+    if (s.ver < ROSTER_VER) {
+      for (var v = s.ver + 1; v <= ROSTER_VER; v++) {
+        var strip = STRIP_BY_VER[v] || [];
+        s.students = s.students.filter(function (st) { return strip.indexOf(st.id) < 0; });
+      }
+      s.ver = ROSTER_VER;
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch (e) {}
+    }
     s.students.forEach(function (st) {
       if (st.status !== "present" && st.status !== "absent" && st.status !== "leave") st.status = "absent";
       if (typeof st.at !== "number") st.at = 0;
@@ -691,6 +703,7 @@
   });
 
   // ---------- 启动 ----------
+  lockCd.textContent = String(Math.round(LOCK_MS / 1000));   // 锁定秒数与 LOCK_MS 保持一致
   renderMain();
   updateHint();
   if (lockActive()) {
