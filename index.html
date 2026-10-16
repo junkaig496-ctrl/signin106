@@ -10,8 +10,7 @@
   html,body{margin:0;padding:0}
   body{
     font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Helvetica Neue",Arial,sans-serif;
-    background:#f4f5f7;color:#1f2430;font-size:16px;line-height:1.45;
-    -webkit-text-size-adjust:100%;
+    background:#f4f5f7;color:#1f2430;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%;
   }
   .wrap{max-width:760px;margin:0 auto;padding:14px 14px 56px}
   h1{font-size:22px;margin:8px 0 14px;text-align:center;font-weight:700;letter-spacing:.5px}
@@ -26,94 +25,82 @@
 
   .input-label{font-size:15px;font-weight:700;margin-bottom:8px}
   .input-label small{font-weight:400;color:#6b7280;font-size:12px}
-  #entry{
-    width:100%;font-size:24px;padding:14px 14px;border:2px solid #d7dae0;border-radius:12px;
-    outline:none;text-align:center;letter-spacing:2px;background:#fbfbfc;font-family:inherit
-  }
+  #entry{width:100%;font-size:24px;padding:14px;border:2px solid #d7dae0;border-radius:12px;outline:none;text-align:center;letter-spacing:2px;background:#fbfbfc;font-family:inherit}
   #entry:focus{border-color:#2563eb;background:#fff}
   #entry:disabled{background:#eef0f3;color:#8b909a}
   .hint{margin-top:9px;min-height:22px;font-size:14px;color:#4b5563;text-align:center}
   .hint .ok{color:#16a34a;font-weight:700}
   .hint .bad{color:#dc2626;font-weight:700}
   .hint .sid{font-weight:700;color:#2563eb}
-  .btn{
-    font-family:inherit;font-size:16px;padding:12px 16px;border-radius:12px;border:none;
-    background:#2563eb;color:#fff;font-weight:700;cursor:pointer
-  }
+  .btn{font-family:inherit;font-size:16px;padding:12px 16px;border-radius:12px;border:none;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}
   .btn:active{opacity:.85}
   .btn.ghost{background:#eef1f5;color:#27303f}
   .btn.danger{background:#dc2626}
   .btn.warn{background:#d97706}
   .btn.block{width:100%;display:block;margin-top:12px;font-size:18px;padding:15px}
   .toolbar{display:flex;gap:10px;margin-bottom:14px}
-  .toolbar .btn{flex:1}
+  .toolbar .btn{flex:1;font-size:15px;padding:12px 8px}
   .closed-tip{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:12px;padding:10px 12px;font-size:14px;margin-bottom:12px;text-align:center}
-  .share-bar{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;border-radius:12px;padding:9px 12px;font-size:13px;margin-bottom:12px;text-align:center}
-  .share-bar b{font-family:ui-monospace,Consolas,monospace}
-  .share-bar .bad{color:#b91c1c}
+  .sync-tip{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;border-radius:12px;padding:9px 12px;font-size:13px;margin-bottom:12px;text-align:center}
 
   ul.roster{list-style:none;margin:0;padding:0}
-  ul.roster li{
-    display:flex;align-items:center;gap:10px;padding:11px 12px;background:#fff;
-    border-radius:10px;margin-bottom:8px;box-shadow:0 1px 2px rgba(20,30,60,.06)
-  }
-  li .sid{font-size:13px;color:#6b7280;min-width:34px;font-variant-numeric:tabular-nums}
-  li .nm{flex:1;font-size:17px;font-weight:600}
-  li .st{font-size:17px;font-weight:700}
+  ul.roster li{background:#fff;border-radius:10px;margin-bottom:8px;padding:9px 12px;box-shadow:0 1px 2px rgba(20,30,60,.06)}
+  .rowtop{display:flex;align-items:center;gap:10px}
+  .rowtop .sid{font-size:13px;color:#6b7280;min-width:30px;font-variant-numeric:tabular-nums}
+  .rowtop .nm{flex:1;font-size:17px;font-weight:600}
+  .rowtop .st{font-size:16px;font-weight:700}
   li.s-present .st{color:#16a34a}
   li.s-absent .st{color:#dc2626}
   li.s-leave .st{color:#d97706}
-  li.s-absent{opacity:.92}
+  .chips{display:flex;gap:6px;margin-top:7px;padding-left:40px}
+  .chip{font-family:inherit;font-size:12px;padding:5px 9px;border-radius:8px;border:1px solid #d7dae0;background:#fff;color:#374151;cursor:pointer}
+  .chip.active{color:#fff;border-color:transparent}
+  .chip.p.active{background:#16a34a}
+  .chip.a.active{background:#dc2626}
+  .chip.l.active{background:#d97706}
   .group-title{font-size:13px;color:#6b7280;margin:14px 4px 8px;font-weight:700}
   .group-title:first-child{margin-top:0}
-
+  .empty{color:#9ca3af;font-size:14px;padding:10px 4px}
   .list-plain{list-style:none;margin:0;padding:0}
   .list-plain li{display:flex;gap:10px;padding:10px 12px;background:#fff;border-radius:10px;margin-bottom:8px;box-shadow:0 1px 2px rgba(20,30,60,.06)}
   .list-plain li .nm{flex:1;font-weight:600}
-  .empty{color:#9ca3af;font-size:14px;padding:10px 4px}
 
-  /* 锁定遮罩 */
-  #lock{
-    position:fixed;inset:0;background:rgba(17,24,39,.94);color:#fff;z-index:50;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px
-  }
+  #lock{position:fixed;inset:0;background:rgba(17,24,39,.94);color:#fff;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
   #lock .lock-name{font-size:34px;font-weight:800;margin:10px 0}
   #lock .lock-say{font-size:17px;color:#a7f3d0;font-weight:700}
   #lock .lock-cd{margin-top:24px;font-size:15px;color:#d1d5db}
   #lock .lock-cd b{font-size:26px;color:#fff;display:inline-block;min-width:34px}
   .checkmark{width:64px;height:64px;border-radius:50%;background:#16a34a;display:flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:6px}
 
-  /* 密码弹窗 */
   .modal{position:fixed;inset:0;background:rgba(17,24,39,.55);z-index:60;display:flex;align-items:center;justify-content:center;padding:18px}
-  .modal .box{background:#fff;border-radius:14px;padding:18px;width:100%;max-width:420px}
+  .modal .box{background:#fff;border-radius:14px;padding:18px;width:100%;max-width:430px}
   .modal h3{margin:0 0 6px;font-size:18px}
-  .modal p{margin:0 0 12px;color:#6b7280;font-size:14px}
-  .modal input{width:100%;font-size:18px;padding:12px;border:2px solid #d7dae0;border-radius:10px;outline:none;font-family:inherit}
+  .modal p{margin:0 0 12px;color:#6b7280;font-size:14px;line-height:1.6}
+  .modal input{width:100%;font-size:18px;padding:12px;border:2px solid #d7dae0;border-radius:10px;outline:none;font-family:inherit;text-align:center}
   .modal input:focus{border-color:#2563eb}
   .modal .row{display:flex;gap:10px;margin-top:12px}
   .modal .row .btn{flex:1}
-  .modal .err{color:#dc2626;font-size:14px;margin-top:8px;min-height:20px}
+  .modal .err{color:#dc2626;font-size:14px;margin-top:8px;min-height:20px;text-align:center}
 
-  /* 管理界面 */
   .adm-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #eef0f3}
   .adm-row .who{flex:1;min-width:120px;font-weight:600}
   .adm-row .who small{color:#6b7280;font-weight:400;margin-left:6px;font-size:12px}
-  .chip{font-family:inherit;font-size:13px;padding:7px 10px;border-radius:9px;border:1px solid #d7dae0;background:#fff;color:#374151;cursor:pointer}
-  .chip.active{color:#fff;border-color:transparent}
-  .chip.p.active{background:#16a34a}
-  .chip.a.active{background:#dc2626}
-  .chip.l.active{background:#d97706}
   .chip.del{color:#dc2626;border-color:#fecaca}
+  .usr{display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border-radius:12px;margin-bottom:9px;box-shadow:0 1px 2px rgba(20,30,60,.06);cursor:pointer}
+  .usr .nm{flex:1;font-weight:700;font-size:16px}
+  .usr .nm small{display:block;font-weight:400;color:#9ca3af;font-size:12px;margin-top:2px}
+  .usr .cnt{font-size:13px;color:#6b7280;text-align:right}
+  .usr .box{width:22px;color:#c3c8d0;text-align:right}
+  .badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:6px;font-size:11px;padding:1px 5px;margin-left:6px;font-weight:600}
+  .hist{padding:9px 0;border-bottom:1px solid #eef0f3;font-size:14px;display:flex;gap:8px}
+  .hist .t{color:#6b7280;font-size:13px;min-width:132px}
   .adm-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .adm-form input{font-family:inherit;font-size:16px;padding:11px;border:2px solid #d7dae0;border-radius:10px;outline:none;min-width:0;flex:1}
   .adm-form input:focus{border-color:#2563eb}
   .sec-title{font-size:15px;font-weight:700;margin:0 0 8px}
   .note{font-size:12px;color:#6b7280;margin-top:8px;line-height:1.6}
   footer{text-align:center;color:#b6bac2;font-size:12px;margin-top:18px;user-select:none}
-  #toast{
-    position:fixed;left:50%;transform:translateX(-50%);bottom:26px;background:rgba(17,24,39,.92);color:#fff;
-    padding:11px 18px;border-radius:999px;font-size:15px;z-index:70;opacity:0;transition:opacity .2s;pointer-events:none
-  }
+  #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;background:rgba(17,24,39,.92);color:#fff;padding:11px 18px;border-radius:999px;font-size:15px;z-index:70;opacity:0;transition:opacity .2s;pointer-events:none}
   #toast.show{opacity:1}
   [hidden]{display:none !important}
 </style>
@@ -122,7 +109,7 @@
 
 <div class="wrap">
 
-  <!-- ============ 主页面 ============ -->
+  <!-- ============ 主页面（用户面前的样子） ============ -->
   <section id="view-main">
     <h1>106班签到系统</h1>
 
@@ -133,7 +120,7 @@
     </div>
 
     <div id="closed-tip" class="closed-tip" hidden>签到已关闭，暂不能签到</div>
-    <div id="share-bar" class="share-bar" hidden>共享房间 <b id="share-room">—</b> · <span id="share-state">连接中…</span></div>
+    <div id="sync-tip" class="sync-tip" hidden></div>
 
     <div class="card">
       <div class="input-label">签到输入 <small>（数字＝学号后两位，汉字＝姓名）</small></div>
@@ -145,14 +132,15 @@
 
     <div class="toolbar">
       <button class="btn ghost" id="btn-stats">统 计</button>
+      <button class="btn warn" id="btn-reset">重置学生状态</button>
     </div>
 
     <div id="roster-host"></div>
 
-    <footer id="footer">v1.0 · 106班签到系统</footer>
+    <footer id="footer">v2.0 · 106班签到系统</footer>
   </section>
 
-  <!-- ============ 统计页面 ============ -->
+  <!-- ============ 统计页 ============ -->
   <section id="view-stats" hidden>
     <h1>统计 · 106班</h1>
     <div class="counters">
@@ -160,84 +148,70 @@
       <div class="counter off"><b id="sc-absent">0</b><span>未签到</span></div>
       <div class="counter lv"><b id="sc-leave">0</b><span>请假</span></div>
     </div>
-
     <div class="card">
       <div class="sec-title">未签到同学 <span id="sl-absent-n" class="note"></span></div>
       <ul class="list-plain" id="sl-absent"></ul>
     </div>
-
     <div class="card">
       <div class="sec-title">请假同学 <span id="sl-leave-n" class="note"></span></div>
       <ul class="list-plain" id="sl-leave"></ul>
     </div>
-
     <button class="btn block" id="btn-back">返 回 系 统</button>
   </section>
 
-  <!-- ============ 密码页面 ============ -->
-  <section id="view-pass" hidden>
-    <h1>身份验证</h1>
-    <div class="card">
-      <div class="input-label">请输入管理密码</div>
-      <input id="pass-input" type="password" autocomplete="off" placeholder="密码" style="width:100%;font-size:20px;padding:13px;border:2px solid #d7dae0;border-radius:12px;outline:none;font-family:inherit;text-align:center">
-      <div class="hint" id="pass-hint" style="text-align:center"></div>
-      <button class="btn block" id="btn-pass-ok">确 定</button>
-      <button class="btn ghost block" id="btn-pass-cancel">取 消，返回签到</button>
+  <!-- ============ 管理：用户列表 ============ -->
+  <section id="view-users" hidden>
+    <h1>管理 · 用户数据</h1>
+    <div class="note" id="users-meta" style="text-align:center;margin-bottom:12px"></div>
+    <div class="toolbar">
+      <button class="btn ghost" id="btn-users-refresh">刷新</button>
+      <button class="btn ghost" id="btn-users-exit">返回签到</button>
     </div>
+    <div id="user-list"></div>
   </section>
 
-  <!-- ============ 管理（隐藏）界面 ============ -->
-  <section id="view-admin" hidden>
-    <h1>管理界面</h1>
+  <!-- ============ 管理：单个用户 ============ -->
+  <section id="view-user" hidden>
+    <h1 id="user-title">用户</h1>
+    <div class="note" id="user-meta" style="text-align:center;margin-bottom:12px"></div>
+
+    <div class="counters">
+      <div class="counter on"><b id="uc-present">0</b><span>已到</span></div>
+      <div class="counter off"><b id="uc-absent">0</b><span>未到</span></div>
+      <div class="counter lv"><b id="uc-leave">0</b><span>请假</span></div>
+    </div>
 
     <div class="card">
       <div class="sec-title">签到开关</div>
       <label style="display:flex;align-items:center;gap:10px;font-size:16px">
-        <input type="checkbox" id="sw-enabled" style="width:20px;height:20px">
-        <span id="sw-text">开启签到（可输入学号 / 姓名）</span>
+        <input type="checkbox" id="uc-enabled" style="width:20px;height:20px">
+        <span id="uc-enabled-text">开启签到</span>
       </label>
-      <div class="note">开启或关闭签到不会改变任何同学的状态。</div>
+      <div class="note">只影响该用户的页面，不改动他的学生标记。</div>
     </div>
 
     <div class="card">
-      <div class="sec-title">修改同学标记</div>
-      <div id="adm-list"></div>
-      <div class="note">点击右侧「已到 / 未到 / 请假」可直接修改该同学标记；点「删除」可移除该同学（需重新输入密码）。</div>
+      <div class="sec-title">改他的学生标记</div>
+      <div id="uc-list"></div>
+      <div class="note">点了即时生效（对该用户而言是"自己变的"，不会有任何提示）。</div>
     </div>
 
     <div class="card">
-      <div class="sec-title">增加学生 <span class="note">（需重新输入密码）</span></div>
+      <div class="sec-title">给他增删学生</div>
       <div class="adm-form">
-        <input id="add-id" type="text" inputmode="numeric" placeholder="学号（后两位或完整学号）" maxlength="12">
-        <input id="add-name" type="text" placeholder="姓名" maxlength="20">
+        <input id="uc-add-id" type="text" inputmode="numeric" placeholder="学号（后两位或完整）" maxlength="12">
+        <input id="uc-add-name" type="text" placeholder="姓名" maxlength="20">
       </div>
-      <button class="btn block" id="btn-add">增 加 学 生</button>
+      <button class="btn block" id="uc-btn-add">增 加 学 生</button>
     </div>
 
     <div class="card">
-      <div class="sec-title">危险操作 <span class="note">（需重新输入密码）</span></div>
-      <button class="btn danger block" id="btn-reset" style="margin-top:0">重置学生状态（全部改为未到）</button>
-      <div class="note">重置后所有同学的标记都会回到「未到」；开启 / 关闭签到的设置不受影响。</div>
+      <div class="sec-title">历史记录 <span class="note">（最近 10 次重置）</span></div>
+      <div id="uc-history"></div>
     </div>
 
-    <div class="card">
-      <div class="sec-title">多设备共享 <span class="note">（可选 · 免注册）</span></div>
-      <div id="share-off">
-        <div class="note" style="margin-top:0">开启后把共享链接发到班群，其他手机 / 平板打开就是<b>同一份名单</b>：谁签到、谁请假、2 秒锁定都跨设备同步（需联网；断网时自动退回本机数据，不影响签到）。</div>
-        <button class="btn block" id="btn-share-start">生成共享房间</button>
-      </div>
-      <div id="share-on" hidden>
-        <div class="note" style="margin-top:0">共享房间：<b id="share-room2">—</b></div>
-        <input id="share-link" type="text" readonly style="width:100%;font-size:13px;padding:9px;border:2px solid #d7dae0;border-radius:9px;margin-top:6px">
-        <div style="display:flex;gap:10px;margin-top:10px">
-          <button class="btn ghost" id="btn-share-copy" style="flex:1">复制共享链接</button>
-          <button class="btn warn" id="btn-share-stop" style="flex:1">停止共享</button>
-        </div>
-        <div class="note" id="share-note"></div>
-      </div>
-    </div>
-
-    <button class="btn block" id="btn-admin-exit">退 出 管 理，返 回 签 到</button>
+    <button class="btn danger block" id="uc-btn-reset">重置他的学生状态（全部未到）</button>
+    <button class="btn ghost block" id="uc-btn-back">返 回 用 户 列 表</button>
   </section>
 
 </div>
@@ -250,16 +224,28 @@
   <div class="lock-cd">请在 <b id="lock-cd">2</b> 秒后再输入下一位</div>
 </div>
 
-<!-- 密码弹窗（管理界面内二次验证） -->
-<div class="modal" id="pwmodal" hidden>
+<!-- 是 / 否 确认 -->
+<div class="modal" id="confirm" hidden>
   <div class="box">
-    <h3 id="pw-title">请输入密码</h3>
-    <p id="pw-desc">此操作需要重新输入管理密码。</p>
-    <input id="pw-input" type="password" autocomplete="off" placeholder="密码">
-    <div class="err" id="pw-err"></div>
+    <h3 id="cf-title">确认操作</h3>
+    <p id="cf-desc"></p>
     <div class="row">
-      <button class="btn ghost" id="pw-cancel">取消</button>
-      <button class="btn" id="pw-ok">确定</button>
+      <button class="btn ghost" id="cf-no">否</button>
+      <button class="btn danger" id="cf-yes">是</button>
+    </div>
+  </div>
+</div>
+
+<!-- 重置前输入自己的名字 -->
+<div class="modal" id="nameprompt" hidden>
+  <div class="box">
+    <h3>重置学生状态</h3>
+    <p>请输入你的名字（必须是名单里的姓名），这次重置会被记录下来。</p>
+    <input id="np-input" type="text" autocomplete="off" placeholder="你的名字" maxlength="20">
+    <div class="err" id="np-err"></div>
+    <div class="row">
+      <button class="btn ghost" id="np-cancel">取消</button>
+      <button class="btn" id="np-ok">确定重置</button>
     </div>
   </div>
 </div>
@@ -270,15 +256,18 @@
 (function () {
   "use strict";
 
-  var STORE_KEY    = "signin106_state_v1";
-  var PASSWORDS    = ["135790abcdeF!", "guojunkai", "我真的是班长"];   // 管理密码，任一可用
-  var ADMIN_ALIASES= ["孙昊", "我是班长"];              // 隐藏入口2：签到框里输入这些名字也进入管理验证
-  var LOCK_MS      = 2000;                             // 两次签到间隔（毫秒）
-  var PREFIX       = "26008106";   // 完整学号 = PREFIX + 后两位
-  var ROSTER_VER   = 2;            // 名单版本，改动名单就 +1
-  var STRIP_BY_VER = { 2: ["05"] }; // 各版本要从旧存档里剔除的学号后两位（v2：删 05）
+  /* ================= 常量 ================= */
+  var STORE_KEY   = "signin106_state_v2";     // 本地数据（升级到 v2：带 uid / 历史）
+  var OLD_KEY     = "signin106_state_v1";     // 旧版存档，用于迁移学生名单
+  var DB_TOPIC    = "c106db-7q4mzp";          // 后台数据通道（用户链接与管理员链接共用）
+  var NT          = "https://ntfy.sh/" + DB_TOPIC;
+  var ADMIN_MODE  = /[?&]m=a(&|$)/.test(location.search);   // 只有管理员链接带 ?m=a
+  var ADMIN_ALIAS = "孙昊";                   // 仅管理员链接上，输入这个名字进管理界面
+  var LOCK_MS     = 2000;
+  var PREFIX      = "26008106";
+  var ROSTER_VER   = 2;
+  var STRIP_BY_VER = { 2: ["05"] };           // 旧存档里要剔除的学号后两位
 
-  // 名单：已按要求去除 02、16、05 三位同学（id 为学号后两位）
   var SEED = [
     ["01","陈锡美"],["03","黄尚玲"],["04","李昕逾"],["06","卢睿馨"],
     ["07","韦理静"],["08","谢春盈"],["09","张凤梅"],["10","邓云麒"],["11","杜云翔"],
@@ -289,116 +278,145 @@
     ["33","张跃飞"],["34","周全"],["35","朱桂良"],["36","朱天佑"]
   ];
 
+  var STATUS_TEXT = { present: "已到", absent: "未到", leave: "请假" };
+
   function seedStudents() {
-    return SEED.map(function (p) {
-      return { id: p[0], name: p[1], status: "absent", at: 0 };
+    return SEED.map(function (p) { return { id: p[0], name: p[1], status: "absent", at: 0 }; });
+  }
+  function rand(n) {
+    var a = "abcdefghjkmnpqrstuvwxyz23456789", s = "";
+    for (var i = 0; i < n; i++) s += a.charAt(Math.floor(Math.random() * a.length));
+    return s;
+  }
+  function mkStudents(arr) {
+    return (arr || []).map(function (s) {
+      return { id: String(s.id), name: String(s.name),
+               status: (s.status === "present" || s.status === "leave") ? s.status : "absent",
+               at: (typeof s.at === "number") ? s.at : 0 };
     });
   }
 
-  var state = load();
-
-  function load() {
-    var s = null;
-    try { s = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch (e) { s = null; }
-    if (!s || !Array.isArray(s.students)) {
-      s = { enabled: true, lockUntil: 0, students: seedStudents(), ver: ROSTER_VER };
-    }
+  /* ================= 本地状态 ================= */
+  function normalize(s) {
     if (typeof s.enabled !== "boolean") s.enabled = true;
     if (typeof s.lockUntil !== "number") s.lockUntil = 0;
-    // 名单版本迁移：从旧存档里剔除已离开班级的同学
-    if (typeof s.ver !== "number") s.ver = 1;
-    if (s.ver < ROSTER_VER) {
-      for (var v = s.ver + 1; v <= ROSTER_VER; v++) {
-        var strip = STRIP_BY_VER[v] || [];
-        s.students = s.students.filter(function (st) { return strip.indexOf(st.id) < 0; });
-      }
-      s.ver = ROSTER_VER;
-      try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch (e) {}
-    }
-    s.students.forEach(function (st) {
-      if (st.status !== "present" && st.status !== "absent" && st.status !== "leave") st.status = "absent";
-      if (typeof st.at !== "number") st.at = 0;
-    });
+    if (typeof s.uid !== "string" || !s.uid) s.uid = "u" + rand(6);
+    if (typeof s.name !== "string") s.name = "";
+    if (!Array.isArray(s.history)) s.history = [];
+    s.history = s.history.filter(function (h) { return h && typeof h.t === "number"; }).slice(0, 10);
+    s.students = mkStudents(Array.isArray(s.students) ? s.students : seedStudents());
     return s;
   }
 
   function save() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
-    if (SHARE.on && !_suppressPush) pushSoon();     // 共享模式下：本地任何改动都会自动同步出去
+    if (!_suppressPush) pushSoon();
   }
 
-  var STATUS_TEXT = { present: "已到", absent: "未到", leave: "请假" };
+  function load() {
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch (e) { s = null; }
+    if (!s || !Array.isArray(s.students)) {
+      var old = null;
+      try { old = JSON.parse(localStorage.getItem(OLD_KEY) || "null"); } catch (e) { old = null; }
+      if (old && Array.isArray(old.students)) {          // 从 v1 迁移学生名单
+        s = { enabled: old.enabled !== false, lockUntil: 0, students: old.students, history: [] };
+      } else {
+        s = { enabled: true, lockUntil: 0, students: seedStudents(), history: [] };
+      }
+    }
+    if (typeof s.ver !== "number") s.ver = 1;
+    if (s.ver < ROSTER_VER) {
+      for (var v = s.ver + 1; v <= ROSTER_VER; v++) {
+        var strip = STRIP_BY_VER[v] || [];
+        s.students = mkStudents(s.students).filter(function (st) { return strip.indexOf(st.id) < 0; });
+      }
+      s.ver = ROSTER_VER;
+    } else {
+      s.students = mkStudents(s.students);
+    }
+    return normalize(s);
+  }
 
-  // ---------- 元素 ----------
-  var $ = function (id) { return document.getElementById(id); };
+  var state = load();
+  var _suppressPush = false;
+
+  /* ================= DOM 小工具 ================= */
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function toast(msg) {
+    var t = $("toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(toast._t); toast._t = setTimeout(function () { t.classList.remove("show"); }, 2000);
+  }
+  function num(st) { return PREFIX + st.id; }
+  function label(st) { return st.id + " " + st.name; }
+  function timeStr(ms) {
+    var d = new Date(ms), p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return (d.getMonth() + 1) + "月" + d.getDate() + "日 " + p(d.getHours()) + ":" + p(d.getMinutes());
+  }
+  function ago(ms) {
+    var s = Math.max(0, Math.round((Date.now() - ms) / 1000));
+    if (s < 60) return s + " 秒前";
+    if (s < 3600) return Math.round(s / 60) + " 分钟前";
+    if (s < 86400) return Math.round(s / 3600) + " 小时前";
+    return Math.round(s / 86400) + " 天前";
+  }
+
   var viewMain = $("view-main"), viewStats = $("view-stats"),
-      viewPass = $("view-pass"), viewAdmin = $("view-admin");
-  var entry = $("entry"), hint = $("hint");
-  var lockEl = $("lock"), lockName = $("lock-name"), lockSay = $("lock-say"), lockCd = $("lock-cd");
-
-  function show(view) {
-    [viewMain, viewStats, viewPass, viewAdmin].forEach(function (v) { v.hidden = (v !== view); });
+      viewUsers = $("view-users"), viewUser = $("view-user");
+  function show(v) {
+    [viewMain, viewStats, viewUsers, viewUser].forEach(function (x) { x.hidden = (x !== v); });
     window.scrollTo(0, 0);
   }
 
-  function toast(msg) {
-    var t = $("toast");
-    t.textContent = msg;
-    t.classList.add("show");
-    clearTimeout(toast._t);
-    toast._t = setTimeout(function () { t.classList.remove("show"); }, 1900);
-  }
-
-  function num(st) { return PREFIX + st.id; }
-  function label(st) { return st.id + " " + st.name; }
-
-  // ---------- 主页面渲染 ----------
-  function orderList() {
-    var present = state.students.filter(function (s) { return s.status === "present"; })
-                              .sort(function (a, b) { return (a.at - b.at) || (a.id < b.id ? -1 : 1); });
-    var leave   = state.students.filter(function (s) { return s.status === "leave"; })
-                              .sort(function (a, b) { return a.id < b.id ? -1 : 1; });
-    var absent  = state.students.filter(function (s) { return s.status === "absent"; })
-                              .sort(function (a, b) { return a.id < b.id ? -1 : 1; });
-    return { present: present, leave: leave, absent: absent };
+  /* ================= 主页面渲染 ================= */
+  function orderList(list) {
+    list = list || state.students;
+    var byId = function (a, b) { return a.id < b.id ? -1 : (a.id > b.id ? 1 : 0); };
+    return {
+      present: list.filter(function (s) { return s.status === "present"; }).sort(function (a, b) { return (a.at - b.at) || byId(a, b); }),
+      leave:   list.filter(function (s) { return s.status === "leave"; }).sort(byId),
+      absent:  list.filter(function (s) { return s.status === "absent"; }).sort(byId)
+    };
   }
 
   function renderMain() {
-    var g = orderList();
-    var n = state.students.length;
+    var g = orderList(), n = state.students.length;
     $("c-present").textContent = g.present.length;
     $("c-absent").textContent  = g.absent.length;
     $("c-leave").textContent   = g.leave.length;
-
     $("closed-tip").hidden = state.enabled;
-    entry.disabled = !state.enabled;
+    $("entry").disabled = !state.enabled;
 
     var html = "";
     function section(title, arr) {
-      if (!arr.length) return "";
-      html += '<div class="group-title">' + title + "（" + arr.length + "/" + n + "）</div><ul class=\"roster\">";
+      if (!arr.length) return;
+      html += '<div class="group-title">' + title + "（" + arr.length + "/" + n + '）</div><ul class="roster">';
       arr.forEach(function (st) {
-        html += '<li class="s-' + st.status + '"><span class="sid">' + st.id + '</span>' +
+        html += '<li class="s-' + st.status + '"><div class="rowtop">' +
+                '<span class="sid">' + esc(st.id) + '</span>' +
                 '<span class="nm">' + esc(st.name) + '</span>' +
-                '<span class="st">' + STATUS_TEXT[st.status] + '</span></li>';
+                '<span class="st">' + STATUS_TEXT[st.status] + '</span></div>' +
+                '<div class="chips">' +
+                '<button class="chip p' + (st.status === "present" ? " active" : "") + '" data-id="' + esc(st.id) + '" data-act="present">已到</button>' +
+                '<button class="chip a' + (st.status === "absent"  ? " active" : "") + '" data-id="' + esc(st.id) + '" data-act="absent">未到</button>' +
+                '<button class="chip l' + (st.status === "leave"   ? " active" : "") + '" data-id="' + esc(st.id) + '" data-act="leave">请假</button>' +
+                "</div></li>";
       });
       html += "</ul>";
     }
     section("已到", g.present);
     section("请假", g.leave);
     section("未到", g.absent);
-    if (!n) html = '<div class="empty">名单为空，请在管理界面添加学生</div>';
+    if (!n) html = '<div class="empty">名单为空</div>';
     $("roster-host").innerHTML = html;
     updateHint();
   }
 
-  function esc(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-    });
-  }
-
-  // ---------- 统计页 ----------
   function renderStats() {
     var g = orderList();
     $("sc-present").textContent = g.present.length;
@@ -406,11 +424,10 @@
     $("sc-leave").textContent   = g.leave.length;
     $("sl-absent-n").textContent = g.absent.length + " 人";
     $("sl-leave-n").textContent  = g.leave.length + " 人";
-
     function fill(el, arr, emptyText) {
       if (!arr.length) { el.innerHTML = '<li class="empty">' + emptyText + "</li>"; return; }
       el.innerHTML = arr.map(function (st) {
-        return '<li><span class="sid" style="min-width:34px;color:#6b7280;font-size:13px">' + st.id +
+        return '<li><span style="min-width:34px;color:#6b7280;font-size:13px">' + esc(st.id) +
                '</span><span class="nm">' + esc(st.name) + "</span></li>";
       }).join("");
     }
@@ -418,531 +435,396 @@
     fill($("sl-leave"), g.leave, "暂无请假同学");
   }
 
-  // ---------- 锁定 ----------
+  /* ================= 锁定（本机生效） ================= */
   var lockTimer = null;
   function lockActive() { return Date.now() < state.lockUntil; }
-
   function applyLock() {
     if (lockActive()) {
-      var left = Math.ceil((state.lockUntil - Date.now()) / 1000);
-      lockCd.textContent = left;
-      lockEl.hidden = false;
+      $("lock-cd").textContent = Math.ceil((state.lockUntil - Date.now()) / 1000);
+      $("lock").hidden = false;
       clearInterval(lockTimer);
       lockTimer = setInterval(function () {
         var l = Math.ceil((state.lockUntil - Date.now()) / 1000);
         if (l <= 0) {
-          clearInterval(lockTimer);
-          lockEl.hidden = true;
-          entry.value = "";
-          updateHint();
-          if (!entry.disabled) { try { entry.focus(); } catch (e) {} }
-        } else {
-          lockCd.textContent = l;
-        }
+          clearInterval(lockTimer); $("lock").hidden = true;
+          $("entry").value = ""; updateHint();
+          if (!$("entry").disabled) { try { $("entry").focus(); } catch (e) {} }
+        } else { $("lock-cd").textContent = l; }
       }, 200);
-    } else {
-      lockEl.hidden = true;
-      clearInterval(lockTimer);
-    }
+    } else { $("lock").hidden = true; clearInterval(lockTimer); }
   }
-
   function doLock(name, say, ms) {
-    state.lockUntil = Date.now() + ms;
-    LOCK_WHO = name;
-    save();
-    lockSay.textContent = say;
-    lockName.textContent = name;
+    state.lockUntil = Date.now() + ms; save();
+    $("lock-say").textContent = say; $("lock-name").textContent = name;
     applyLock();
   }
 
-  // ---------- 签到匹配 ----------
-  function findStudent(raw) {
-    var v = String(raw || "").trim();
+  /* ================= 输入匹配 ================= */
+  function findStudent(raw, list) {
+    var v = String(raw || "").trim(), arr = list || state.students;
     if (!v) return { err: "请先输入学号后两位或姓名" };
-
     if (/^\d+$/.test(v)) {
-      var two = v.length >= 2 ? v.slice(-2) : ("0" + v);
-      var s = null;
-      for (var i = 0; i < state.students.length; i++) {
-        if (state.students[i].id === two) { s = state.students[i]; break; }
-      }
-      if (!s) return { err: "名单中没有学号后两位为 " + two + " 的同学" };
-      return { s: s };
+      var two = v.length >= 2 ? v.slice(-2) : ("0" + v), hit = null;
+      arr.forEach(function (s) { if (s.id === two) hit = s; });
+      if (!hit) return { err: "名单中没有学号后两位为 " + two + " 的同学" };
+      return { s: hit };
     }
-
     var name = v.replace(/[^\u4e00-\u9fa5]/g, "");
     if (!name) return { err: "无法识别，请输入学号后两位或姓名" };
-
-    var m = state.students.filter(function (s) { return s.name === name; });
-    if (!m.length) m = state.students.filter(function (s) { return s.name.indexOf(name) === 0; });
-    if (!m.length) m = state.students.filter(function (s) { return s.name.indexOf(name) >= 0; });
+    var m = arr.filter(function (s) { return s.name === name; });
+    if (!m.length) m = arr.filter(function (s) { return s.name.indexOf(name) === 0; });
+    if (!m.length) m = arr.filter(function (s) { return s.name.indexOf(name) >= 0; });
     if (!m.length) return { err: "名单中没有找到「" + name + "」" };
-    if (m.length > 1) {
-      return { err: "匹配到多位同学：" + m.map(label).join("、") + "，请输入完整姓名" };
-    }
+    if (m.length > 1) return { err: "匹配到多位同学：" + m.map(label).join("、") + "，请输入完整姓名" };
     return { s: m[0] };
   }
 
+  var DEFAULT_HINT = "学号只需输入后两位，例如：<b>06</b>（也可写 6）；姓名可直接输入，例如：陈锡美";
   function updateHint() {
-    var v = entry.value.trim();
-    if (!state.enabled) { hint.innerHTML = "签到已关闭"; return; }
-    var DEFAULT_HINT = "学号只需输入后两位，例如：<b>06</b>（也可写 6）；姓名可直接输入，例如：陈锡美";
-    if (!v) { hint.innerHTML = DEFAULT_HINT; return; }
-    if (isAliasPrefix(v)) { hint.innerHTML = DEFAULT_HINT; return; }
+    var e = $("entry"), v = e.value.trim();
+    if (!state.enabled) { $("hint").innerHTML = "签到已关闭"; return; }
+    if (!v) { $("hint").innerHTML = DEFAULT_HINT; return; }
+    if (ADMIN_MODE && ADMIN_ALIAS.indexOf(v) === 0) { $("hint").innerHTML = DEFAULT_HINT; return; }
     if (/^\d+$/.test(v)) {
-      var two = v.length >= 2 ? v.slice(-2) : ("0" + v);
-      var s = null;
-      for (var i = 0; i < state.students.length; i++) {
-        if (state.students[i].id === two) { s = state.students[i]; break; }
-      }
+      var two = v.length >= 2 ? v.slice(-2) : ("0" + v), s = null;
+      state.students.forEach(function (x) { if (x.id === two) s = x; });
       if (s) {
-        hint.innerHTML = '学号后两位 <span class="sid">' + two + "</span> → " +
-          esc(num(s)) + " " + esc(s.name) +
+        $("hint").innerHTML = '学号后两位 <span class="sid">' + two + "</span> → " + esc(num(s)) + " " + esc(s.name) +
           (s.status === "present" ? '（<span class="bad">已签到</span>）' :
-           s.status === "leave" ? '（<span class="bad">已请假</span>）' : "") ;
+           s.status === "leave" ? '（<span class="bad">已请假</span>）' : "");
       } else {
-        hint.innerHTML = '学号后两位 <span class="sid">' + two + "</span>：<span class=\"bad\">名单中没有这位同学</span>";
+        $("hint").innerHTML = '学号后两位 <span class="sid">' + two + '</span>：<span class="bad">名单中没有这位同学</span>';
       }
       return;
     }
     var r = findStudent(v);
-    if (r.s) hint.innerHTML = "姓名匹配：" + esc(label(r.s)) + "（输入的是姓名，不是学号）";
-    else hint.innerHTML = '<span class="bad">' + esc(r.err) + "</span>";
+    if (r.s) $("hint").innerHTML = "姓名匹配：" + esc(label(r.s)) + "（输入的是姓名，不是学号）";
+    else $("hint").innerHTML = '<span class="bad">' + esc(r.err) + "</span>";
   }
 
   function submit() {
-    var raw0 = String(entry.value || "").trim();
-    if (isAdminAlias(raw0)) {            // 隐藏入口2：签到框输入暗号 → 进入管理验证
-      entry.value = "";
-      updateHint();
-      openPassScreen();
+    var raw0 = String($("entry").value || "").trim();
+    if (ADMIN_MODE && raw0 === ADMIN_ALIAS) {     // 只有管理员链接认这个暗号
+      $("entry").value = ""; updateHint();
+      openUsers();
       return;
     }
     if (lockActive()) return;
-    if (SHARE.on) { pullLatest(doSubmit); }   // 共享模式：先对齐最新状态再判定，降低跨设备抢签
-    else { doSubmit(); }
+    pullMine(doSubmit);                            // 先把后台里"我的"最新数据拉下来（含管理员偷偷改的）
   }
 
   function doSubmit() {
-    if (lockActive()) return;                 // 拉取后可能被别人锁住/关闭签到
+    if (lockActive()) return;
     if (!state.enabled) { toast("签到已关闭"); return; }
-    var raw = entry.value;
+    var raw = $("entry").value;
     var r = findStudent(raw);
-    if (r.err) { hint.innerHTML = '<span class="bad">' + esc(r.err) + "</span>"; return; }
+    if (r.err) { $("hint").innerHTML = '<span class="bad">' + esc(r.err) + "</span>"; return; }
     var st = r.s;
-    if (st.status === "present") {
-      doLock(label(st), "已经签到过了", LOCK_MS);
-      lockSay.textContent = "该同学已经签到过了";
-      return;
-    }
-    if (st.status === "leave") {
-      doLock(label(st), "这位同学已请假", LOCK_MS);
-      lockSay.textContent = "这位同学已请假";
-      return;
-    }
-    st.status = "present";
-    st.at = Date.now();
+    if (st.status === "present") { doLock(label(st), "已经签到过了", LOCK_MS); $("lock-say").textContent = "该同学已经签到过了"; return; }
+    if (st.status === "leave")   { doLock(label(st), "这位同学已请假", LOCK_MS); $("lock-say").textContent = "这位同学已请假"; return; }
+    st.status = "present"; st.at = Date.now();
     save();
-    entry.value = "";
-    renderMain();
+    $("entry").value = ""; renderMain();
     doLock(label(st), "签到成功", LOCK_MS);
   }
 
-  // ---------- 多设备共享（ntfy.sh 免注册通道，SSE 实时推送） ----------
-  var SHARE_KEY = "signin106_share_v1";
-  var DEV_ID = Math.random().toString(36).slice(2, 8);
-  var SHARE = { on: false, room: "", key: "", es: null, err: 0, lastOk: 0, esOpen: false };
-  var _suppressPush = false;
-  var LOCK_WHO = "";                        // 最近一次锁定是谁造成的（跨设备显示用）
-
-  function shareSave() {
-    try { localStorage.setItem(SHARE_KEY, JSON.stringify({ on: SHARE.on, room: SHARE.room })); } catch (e) {}
+  /* ================= 后台通道（ntfy，免注册） ================= */
+  var SH = { err: 0, lastOk: 0, key: "" };
+  var SEQ = 0;
+  // 排序键：优先用记录里的客户端毫秒时间 + 自增序号（同一秒内多次改动也能正确排序），
+  // 不能用 ntfy 的 message id 兜底 —— 它同秒内不是时间序（踩过：历史 3 条被旧数据覆盖成 2 条）。
+  function msgKey(m, rec) {
+    var t = (rec && typeof rec.t === "number") ? rec.t : (m.time * 1000);
+    var q = (rec && typeof rec.seq === "number") ? rec.seq : 0;
+    return ("0000000000000000" + t).slice(-16) + "|" + ("000" + q).slice(-4) + "|" + String(m.id || "");
   }
-  function shareTopic() { return "signin106-" + SHARE.room; }
-  function shareLink() { return location.origin + location.pathname + "?room=" + SHARE.room; }
-  function newRoom() {
-    var a = "abcdefghjkmnpqrstuvwxyz23456789", s = "";
-    for (var i = 0; i < 6; i++) s += a.charAt(Math.floor(Math.random() * a.length));
-    return s;
+  function mine() {
+    return { uid: state.uid, name: state.name || "", t: Date.now(), seq: ++SEQ, enabled: state.enabled,
+             students: state.students, history: state.history };
   }
-  function msgKey(m) { return ("000000000000" + m.time).slice(-12) + "|" + String(m.id || ""); }
+  function pushSoon() { clearTimeout(pushSoon._t); pushSoon._t = setTimeout(function () { publish(mine()); }, 200); }
 
-  function sharePayload() {
-    return { t: Date.now(), dev: DEV_ID, ver: state.ver, enabled: state.enabled,
-             students: state.students };   // 锁定（lockUntil/lockWho）只在各设备本机生效，不参与同步
-  }
-
-  function pushSoon() {                       // 合并密集改动后再推
-    if (!SHARE.on) return;
-    clearTimeout(pushSoon._t);
-    pushSoon._t = setTimeout(publish, 150);
+  function publish(rec) {
+    return fetch(NT, { method: "POST", headers: { "Content-Type": "text/plain" },
+                       body: JSON.stringify(rec), cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(function (m) { if (m && m.id) SH.key = msgKey(m, rec); SH.err = 0; SH.lastOk = Date.now(); syncTip(); return true; })
+      .catch(function () { SH.err++; syncTip(); return false; });
   }
 
-  function publish() {
-    if (!SHARE.on) return Promise.resolve(false);
-    return fetch("https://ntfy.sh/" + shareTopic(), {
-      method: "POST", headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(sharePayload()), cache: "no-store"
-    }).then(function (r) {
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      return r.json();
-    }).then(function (m) {
-      if (m && m.id) { var k = msgKey(m); if (k > SHARE.key) SHARE.key = k; }
-      SHARE.err = 0; SHARE.lastOk = Date.now(); renderShareBar();
-      return true;
-    }).catch(function () {
-      SHARE.err++; renderShareBar();
-      return false;
+  function fetchAll(cb) {                          // 拉全部记录，按 uid 取最新
+    fetch(NT + "/json?poll=1", { cache: "no-store" })
+      .then(function (r) { return r.text(); })
+      .then(function (txt) {
+        txt.split("\n").forEach(function (line) {
+          line = line.trim(); if (!line) return;
+          var m; try { m = JSON.parse(line); } catch (e) { return; }
+          if (!m || m.event !== "message") return;
+          var rec; try { rec = JSON.parse(m.message); } catch (e) { return; }
+          if (!rec || !rec.uid || !Array.isArray(rec.students)) return;
+          var k = msgKey(m, rec), cur = RECS[rec.uid];
+          if (!cur || k > cur.key) { rec.key = k; rec.lastT = rec.t || (m.time * 1000); RECS[rec.uid] = rec; }
+        });
+        SH.err = 0; SH.lastOk = Date.now();
+        cb();
+      })
+      .catch(function () { SH.err++; cb(); });
+  }
+
+  var RECS = {};                                   // uid -> 记录
+  function pullMine(cb) {                          // 把"我的"记录同步进来
+    fetchAll(function () {
+      var r = RECS[state.uid];
+      if (r) {
+        _suppressPush = true;
+        state.enabled  = r.enabled !== false;
+        state.students = mkStudents(r.students);
+        state.history  = (r.history || []).slice(0, 10);
+        if (r.name) state.name = r.name;
+        save(); _suppressPush = false;
+        renderMain();
+      }
+      syncTip(); if (cb) cb();
     });
   }
 
-  function adopt(payload, key) {              // 用远端状态覆盖本机
-    if (!payload || !Array.isArray(payload.students)) return false;
-    _suppressPush = true;
-    try {
-      state.enabled   = payload.enabled !== false;
-      if (typeof payload.ver === "number") state.ver = payload.ver;
-      state.students  = payload.students.map(function (s) {
-        return { id: String(s.id), name: String(s.name),
-                 status: (s.status === "present" || s.status === "leave") ? s.status : "absent",
-                 at: (typeof s.at === "number") ? s.at : 0 };
-      });
-      save();
-    } finally { _suppressPush = false; }
-    if (key) SHARE.key = key;
-    SHARE.err = 0; SHARE.lastOk = Date.now();
-    renderMain();
-    if (!viewAdmin.hidden) renderAdmin();
-    applyLock();               // 只反映【本机】自己的锁定，忽略远端锁定
-    renderShareBar();
-    return true;
+  function syncTip() {
+    var el = $("sync-tip");
+    if (!SH.lastOk) { el.hidden = false; el.textContent = "正在连接数据服务…"; }
+    else if (SH.err >= 3) { el.hidden = false; el.textContent = "网络异常，数据暂存在本机，恢复后自动补传"; }
+    else { el.hidden = true; }
   }
 
-  function lastMessage(txt) {
-    var last = null;
-    String(txt || "").split("\n").forEach(function (line) {
-      line = line.trim(); if (!line) return;
-      try { var m = JSON.parse(line); if (m && m.event === "message") last = m; } catch (e) {}
+  /* ================= 用户：重置（要求输入自己的名字） ================= */
+  var npCb = null;
+  function askName(title, desc, cb) {
+    npCb = cb;
+    $("nameprompt").querySelector("h3").textContent = title || "重置学生状态";
+    $("nameprompt").querySelector("p").textContent = desc || "请输入你的名字（必须是名单里的姓名）。";
+    $("np-input").value = ""; $("np-err").textContent = "";
+    $("nameprompt").hidden = false;
+    setTimeout(function () { try { $("np-input").focus(); } catch (e) {} }, 60);
+  }
+  function npClose() { $("nameprompt").hidden = true; npCb = null; }
+  function npOk() {
+    var v = $("np-input").value.trim();
+    var hit = null;
+    state.students.forEach(function (s) { if (s.name === v) hit = s; });
+    if (!v) { $("np-err").textContent = "请输入你的名字"; return; }
+    if (!hit) { $("np-err").textContent = "名单里没有「" + v + "」这个名字"; return; }
+    var cb = npCb; npClose();
+    if (cb) cb(v);
+  }
+
+  function userReset() {
+    askName("重置学生状态", "请输入你的名字（必须是名单里的姓名），这次重置会被记录下来。", function (name) {
+      state.name = name;
+      state.students.forEach(function (s) { s.status = "absent"; s.at = 0; });
+      state.history.unshift({ t: Date.now(), name: name });
+      state.history = state.history.slice(0, 10);
+      state.lockUntil = 0;
+      save(); renderMain();
+      toast("已重置（记录： " + name + "）");
     });
-    return last;
   }
 
-  function pullLatest(cb) {                   // 判定签到前先对齐一次最新状态
-    if (!SHARE.on) { cb(); return; }
-    fetch("https://ntfy.sh/" + shareTopic() + "/json?poll=1", { cache: "no-store" })
-      .then(function (r) { return r.text(); })
-      .then(function (txt) {
-        var last = lastMessage(txt);
-        if (last && msgKey(last) > SHARE.key) {
-          try { adopt(JSON.parse(last.message), msgKey(last)); } catch (e) {}
-        }
-        SHARE.err = 0; SHARE.lastOk = Date.now();
-      })
-      .catch(function () { SHARE.err++; })
-      .then(function () { renderShareBar(); cb(); });
+  /* ================= 是 / 否 确认 ================= */
+  var cfCb = null;
+  function confirmYesNo(title, desc, cb) {
+    cfCb = cb;
+    $("cf-title").textContent = title;
+    $("cf-desc").textContent = desc || "";
+    $("confirm").hidden = false;
+  }
+  function cfClose() { $("confirm").hidden = true; cfCb = null; }
+
+  /* ================= 管理端 ================= */
+  var CUR_UID = null;
+
+  function openUsers() {
+    show(viewUsers);
+    CUR_UID = null;
+    reloadUsers(true);
   }
 
-  function startSSE() {
-    if (!SHARE.on) return;
-    if (SHARE.es) { try { SHARE.es.close(); } catch (e) {} SHARE.es = null; }
-    try {
-      var es = new EventSource("https://ntfy.sh/" + shareTopic() + "/sse");
-      SHARE.es = es;
-      es.onopen = function () { SHARE.err = 0; SHARE.esOpen = true; SHARE.lastOk = Date.now(); renderShareBar(); };
-      es.onmessage = function (ev) {
-        SHARE.err = 0; SHARE.lastOk = Date.now();
-        try {
-          var m = JSON.parse(ev.data);
-          if (m && m.event === "message") {
-            var k = msgKey(m);
-            if (k > SHARE.key) adopt(JSON.parse(m.message), k);
-          }
-        } catch (e) {}
-        renderShareBar();
-      };
-      es.onerror = function () { SHARE.esOpen = false; SHARE.err++; renderShareBar(); };   // EventSource 会自动重连
-    } catch (e) { SHARE.err++; renderShareBar(); }
+  function reloadUsers(first) {
+    $("users-meta").textContent = "正在读取…";
+    fetchAll(function () {
+      var arr = Object.keys(RECS).map(function (k) { return RECS[k]; })
+        .sort(function (a, b) { return (b.lastT || 0) - (a.lastT || 0); });
+      if (!arr.length) {
+        $("users-meta").textContent = "还没有任何用户数据（或服务暂时连不上）";
+        $("user-list").innerHTML = "";
+        return;
+      }
+      $("users-meta").textContent = "共 " + arr.length + " 个用户 · " + (SH.err ? "连接异常" : "数据来自后台通道");
+      $("user-list").innerHTML = arr.map(function (r) {
+        var g = orderList(mkStudents(r.students));
+        var nm = r.name ? esc(r.name) : "未命名用户";
+        var me = (r.uid === state.uid) ? '<span class="badge">本机</span>' : "";
+        return '<div class="usr" data-uid="' + esc(r.uid) + '">' +
+          '<div class="nm">' + nm + me + '<small>' + esc(r.uid) + " · " + ago(r.lastT || 0) + "活动</small></div>" +
+          '<div class="cnt">已到 ' + g.present.length + " / " + r.students.length + "<br>历史 " + (r.history || []).length + " 条</div>" +
+          '<div class="box">›</div></div>';
+      }).join("");
+      if (first) toast("已加载 " + arr.length + " 个用户");
+    });
   }
 
-  function shareStart(room, quiet) {
-    SHARE.room = room; SHARE.on = true; shareSave();
-    renderShareBar();
-    fetch("https://ntfy.sh/" + shareTopic() + "/json?poll=1", { cache: "no-store" })
-      .then(function (r) { return r.text(); })
-      .then(function (txt) {
-        var last = lastMessage(txt);
-        if (last) { try { adopt(JSON.parse(last.message), msgKey(last)); } catch (e) {} }
-        else { publish(); }                    // 服务端还没有 → 以本机名单为准
-        SHARE.err = 0; SHARE.lastOk = Date.now();
-        startSSE(); renderShareBar();
-        if (!quiet) toast("共享已开启 · 房间 " + room);
-      })
-      .catch(function () {
-        SHARE.err++; renderShareBar(); startSSE();
-        if (!quiet) toast("共享服务暂时连不上，先用本机数据");
-      });
+  function openUser(uid) {
+    CUR_UID = uid;
+    var r = RECS[uid];
+    if (!r) { toast("该用户数据已过期"); return; }
+    show(viewUser);
+    renderUserDetail();
   }
 
-  function shareStop() {
-    if (SHARE.es) { try { SHARE.es.close(); } catch (e) {} SHARE.es = null; }
-    SHARE.on = false; SHARE.room = ""; SHARE.key = "";
-    SHARE.esOpen = false;
-    shareSave(); renderShareBar();
-    toast("已停止共享（本机名单保留）");
+  function renderUserDetail() {
+    var r = RECS[CUR_UID];
+    if (!r) return;
+    var students = mkStudents(r.students);
+    var g = orderList(students);
+    $("user-title").textContent = "用户：" + (r.name || "未命名");
+    $("user-meta").textContent = esc(r.uid) + " · 最后活动 " + ago(r.lastT || 0);
+    $("uc-present").textContent = g.present.length;
+    $("uc-absent").textContent  = g.absent.length;
+    $("uc-leave").textContent   = g.leave.length;
+    $("uc-enabled").checked = r.enabled !== false;
+    $("uc-enabled-text").textContent = (r.enabled !== false) ? "开启签到" : "关闭签到";
+
+    $("uc-list").innerHTML = students.slice().sort(function (a, b) { return a.id < b.id ? -1 : 1; })
+      .map(function (st) {
+        return '<div class="adm-row">' +
+          '<div class="who">' + esc(st.id) + " " + esc(st.name) + "<small>" + esc(num(st)) + "</small></div>" +
+          '<button class="chip p' + (st.status === "present" ? " active" : "") + '" data-act="present" data-id="' + esc(st.id) + '">已到</button>' +
+          '<button class="chip a' + (st.status === "absent"  ? " active" : "") + '" data-act="absent"  data-id="' + esc(st.id) + '">未到</button>' +
+          '<button class="chip l' + (st.status === "leave"   ? " active" : "") + '" data-act="leave"   data-id="' + esc(st.id) + '">请假</button>' +
+          '<button class="chip del" data-act="del" data-id="' + esc(st.id) + '">删除</button>' +
+          "</div>";
+      }).join("") || '<div class="empty">名单为空</div>';
+
+    var hist = (r.history || []).slice(0, 10);
+    $("uc-history").innerHTML = hist.length
+      ? hist.map(function (h, i) {
+          return '<div class="hist"><span class="t">' + timeStr(h.t) + '</span><span>第 ' + (hist.length - i) +
+                 ' 次重置 · 输入的名字：<b>' + esc(h.name || "（未记录）") + "</b></span></div>";
+        }).join("")
+      : '<div class="empty">还没有重置记录</div>';
   }
 
-  function renderShareBar() {
-    var bar = $("share-bar");
-    if (bar) bar.hidden = !SHARE.on;
-    if (SHARE.on) {
-      $("share-room").textContent = SHARE.room;
-      var st = $("share-state");
-      if (SHARE.err) st.innerHTML = '<span class="bad">同步异常，正在重试（本机仍可签到）</span>';
-      else if (SHARE.esOpen) st.textContent = "实时同步中";
-      else if (SHARE.lastOk) st.textContent = "已同步 · " + Math.max(0, Math.round((Date.now() - SHARE.lastOk) / 1000)) + " 秒前";
-      else st.textContent = "连接中…";
-    }
-    if ($("share-off")) {
-      $("share-off").hidden = SHARE.on;
-      $("share-on").hidden = !SHARE.on;
-    }
-    if (SHARE.on && $("share-link")) {
-      $("share-room2").textContent = SHARE.room;
-      $("share-link").value = shareLink();
-      $("share-note").textContent = SHARE.err
-        ? "最近一次同步失败，会自动重试；期间各设备仍可按本机数据签到。"
-        : "把上面的链接发到班群，其他手机打开即加入同一份名单。";
-    }
+  function saveRec(uid, mut, cb) {                 // 改某个用户的记录并推回后台
+    var r = RECS[uid]; if (!r) return;
+    mut(r);
+    r.t = Date.now();
+    r.seq = (typeof r.seq === "number" ? r.seq : 0) + 1;
+    if (cb) cb(true);                              // 先刷新界面（不等网络）
+    publish(r);                                    // 后台上传，失败也不打断操作
   }
 
-  function shareLoad() {
-    var s = null;
-    try { s = JSON.parse(localStorage.getItem(SHARE_KEY) || "null"); } catch (e) { s = null; }
-    var m = /[?&]room=([a-z0-9]{4,16})/i.exec(location.search);
-    if (m) { SHARE.room = m[1]; SHARE.on = true; shareSave(); }        // 从共享链接进来 → 直接加入
-    else if (s && s.on && s.room) { SHARE.room = s.room; SHARE.on = true; }
-    return SHARE.on;
-  }
+  /* ================= 事件绑定 ================= */
+  $("entry").addEventListener("input", updateHint);
+  $("entry").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); submit(); } });
+  $("btn-sign").addEventListener("click", submit);
+  $("btn-stats").addEventListener("click", function () { renderStats(); show(viewStats); });
+  $("btn-back").addEventListener("click", function () { renderMain(); show(viewMain); });
+  $("btn-reset").addEventListener("click", userReset);
 
-  // ---------- 密码 ----------
-  function checkPass(v) {
-    var s = String(v == null ? "" : v).trim();
-    for (var i = 0; i < PASSWORDS.length; i++) {
-      if (s === PASSWORDS[i] || s.toLowerCase() === PASSWORDS[i].toLowerCase()) return true;
-    }
-    return false;
-  }
-
-  function isAdminAlias(v) {
-    var s = String(v == null ? "" : v).trim();
-    for (var i = 0; i < ADMIN_ALIASES.length; i++) { if (s === ADMIN_ALIASES[i]) return true; }
-    return false;
-  }
-
-  function isAliasPrefix(v) {
-    var s = String(v == null ? "" : v);
-    for (var i = 0; i < ADMIN_ALIASES.length; i++) { if (ADMIN_ALIASES[i].indexOf(s) === 0) return true; }
-    return false;
-  }
-
-  function openPassScreen() {
-    $("pass-input").value = "";
-    $("pass-hint").innerHTML = "";
-    show(viewPass);
-    setTimeout(function () { try { $("pass-input").focus(); } catch (e) {} }, 60);
-  }
-
-  function passOk() {
-    var v = $("pass-input").value;
-    if (checkPass(v)) {
-      $("pass-input").value = "";
-      show(viewAdmin);
-      renderAdmin();
-    } else {
-      $("pass-hint").innerHTML = '<span class="bad">密码错误</span>';
-      $("pass-input").value = "";
-      $("pass-input").focus();
-    }
-  }
-
-  var pwCb = null;
-  function requirePassword(title, desc, cb) {
-    pwCb = cb;
-    $("pw-title").textContent = title;
-    $("pw-desc").textContent = desc || "此操作需要重新输入管理密码。";
-    $("pw-input").value = "";
-    $("pw-err").textContent = "";
-    $("pwmodal").hidden = false;
-    setTimeout(function () { try { $("pw-input").focus(); } catch (e) {} }, 60);
-  }
-  function pwClose() { $("pwmodal").hidden = true; pwCb = null; }
-  function pwOk() {
-    if (checkPass($("pw-input").value)) {
-      var cb = pwCb;
-      pwClose();
-      if (cb) cb();
-    } else {
-      $("pw-err").textContent = "密码错误，请重新输入";
-      $("pw-input").value = "";
-      $("pw-input").focus();
-    }
-  }
-
-  // ---------- 管理界面 ----------
-  function renderAdmin() {
-    $("sw-enabled").checked = !!state.enabled;
-    $("sw-text").textContent = state.enabled ? "开启签到（可输入学号 / 姓名）" : "关闭签到（暂不能签到）";
-
-    var arr = state.students.slice().sort(function (a, b) { return a.id < b.id ? -1 : 1; });
-    $("adm-list").innerHTML = arr.map(function (st) {
-      return '<div class="adm-row">' +
-        '<div class="who">' + st.id + " " + esc(st.name) + "<small>" + num(st) + "</small></div>" +
-        '<button class="chip p' + (st.status === "present" ? " active" : "") + '" data-act="present" data-id="' + st.id + '">已到</button>' +
-        '<button class="chip a' + (st.status === "absent"  ? " active" : "") + '" data-act="absent"  data-id="' + st.id + '">未到</button>' +
-        '<button class="chip l' + (st.status === "leave"   ? " active" : "") + '" data-act="leave"   data-id="' + st.id + '">请假</button>' +
-        '<button class="chip del" data-act="del" data-id="' + st.id + '">删除</button>' +
-        "</div>";
-    }).join("") || '<div class="empty">名单为空</div>';
-  }
-
-  $("adm-list").addEventListener("click", function (e) {
+  // 用户主页里的三态按钮
+  $("roster-host").addEventListener("click", function (e) {
     var b = e.target.closest ? e.target.closest("button[data-act]") : null;
     if (!b) return;
-    var id = b.getAttribute("data-id"), act = b.getAttribute("data-act");
-    var st = null;
+    var id = b.getAttribute("data-id"), act = b.getAttribute("data-act"), st = null;
     state.students.forEach(function (x) { if (x.id === id) st = x; });
     if (!st) return;
+    st.status = act;
+    st.at = (act === "present") ? (st.at || Date.now()) : 0;
+    save(); renderMain();
+  });
 
+  $("btn-users-refresh").addEventListener("click", function () { reloadUsers(false); });
+  $("btn-users-exit").addEventListener("click", function () { renderMain(); show(viewMain); });
+  $("user-list").addEventListener("click", function (e) {
+    var row = e.target.closest ? e.target.closest(".usr") : null;
+    if (row) openUser(row.getAttribute("data-uid"));
+  });
+  $("uc-btn-back").addEventListener("click", function () { openUsers(); });
+
+  $("uc-list").addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest("button[data-act]") : null;
+    if (!b || !CUR_UID) return;
+    var id = b.getAttribute("data-id"), act = b.getAttribute("data-act");
     if (act === "del") {
-      requirePassword("删除学生", "确认删除 " + id + " " + st.name + "？请重新输入管理密码。", function () {
-        state.students = state.students.filter(function (x) { return x.id !== id; });
-        save(); renderAdmin(); renderMain();
-        toast("已删除 " + id + " " + st.name);
+      confirmYesNo("删除学生？", "将从该用户的名单里删除 " + id + "，他没有办法察觉。", function () {
+        saveRec(CUR_UID, function (r) {
+          r.students = mkStudents(r.students).filter(function (s) { return s.id !== id; });
+        }, function () { renderUserDetail(); toast("已从该用户名单中删除"); });
       });
       return;
     }
-    st.status = act;
-    if (act === "present") { if (!st.at) st.at = Date.now(); } else { st.at = 0; }
-    save(); renderAdmin(); renderMain();
-    toast(id + " " + st.name + " → " + STATUS_TEXT[act]);
+    saveRec(CUR_UID, function (r) {
+      r.students = mkStudents(r.students).map(function (s) {
+        if (s.id === id) { s.status = act; s.at = (act === "present") ? (s.at || Date.now()) : 0; }
+        return s;
+      });
+    }, function (ok) { renderUserDetail(); toast(ok ? "已修改（他不会收到任何提示）" : "修改已应用，但上传失败"); });
   });
 
-  // 增加学生
-  $("btn-add").addEventListener("click", function () {
-    var rawId = $("add-id").value.trim();
-    var name  = $("add-name").value.trim();
+  $("uc-btn-add").addEventListener("click", function () {
+    if (!CUR_UID) return;
+    var rawId = $("uc-add-id").value.trim(), name = $("uc-add-name").value.trim();
     if (!rawId || !/^\d+$/.test(rawId)) { toast("请输入学号（后两位或完整学号）"); return; }
     var id = rawId.length >= 2 ? rawId.slice(-2) : ("0" + rawId);
     if (!name) { toast("请输入姓名"); return; }
     var dup = null;
-    state.students.forEach(function (x) { if (x.id === id) dup = x; });
+    mkStudents(RECS[CUR_UID].students).forEach(function (x) { if (x.id === id) dup = x; });
     if (dup) { toast("学号 " + id + " 已存在（" + dup.name + "）"); return; }
-
-    requirePassword("增加学生", "将新增 " + id + " " + name + "，请重新输入管理密码。", function () {
-      state.students.push({ id: id, name: name, status: "absent", at: 0 });
-      save();
-      $("add-id").value = ""; $("add-name").value = "";
-      renderAdmin(); renderMain();
-      toast("已增加 " + id + " " + name);
+    saveRec(CUR_UID, function (r) {
+      r.students = mkStudents(r.students).concat([{ id: id, name: name, status: "absent", at: 0 }]);
+    }, function () {
+      $("uc-add-id").value = ""; $("uc-add-name").value = "";
+      renderUserDetail(); toast("已增加 " + id + " " + name);
     });
   });
 
-  // 重置
-  $("btn-reset").addEventListener("click", function () {
-    requirePassword("重置学生状态", "所有同学将回到「未到」，签到开关不受影响。请重新输入管理密码。", function () {
-      state.students.forEach(function (st) { st.status = "absent"; st.at = 0; });
-      state.lockUntil = 0;
-      save(); renderAdmin(); renderMain();
-      toast("已重置全部学生状态");
+  $("uc-enabled").addEventListener("change", function () {
+    if (!CUR_UID) return;
+    var on = this.checked;
+    saveRec(CUR_UID, function (r) { r.enabled = on; }, function () {
+      $("uc-enabled-text").textContent = on ? "开启签到" : "关闭签到";
+      toast(on ? "已为他开启签到" : "已为他关闭签到（标记不变）");
     });
   });
 
-  // 签到开关（不重置状态）
-  $("sw-enabled").addEventListener("change", function () {
-    state.enabled = this.checked;
-    save();
-    $("sw-text").textContent = state.enabled ? "开启签到（可输入学号 / 姓名）" : "关闭签到（暂不能签到）";
-    renderMain();
-    toast(state.enabled ? "已开启签到" : "已关闭签到（学生状态保留）");
+  $("uc-btn-reset").addEventListener("click", function () {
+    if (!CUR_UID) return;
+    confirmYesNo("重置他的学生状态？", "该用户所有同学都会变回「未到」，并记入一次历史记录。", function () {
+      saveRec(CUR_UID, function (r) {
+        r.students = mkStudents(r.students).map(function (s) { s.status = "absent"; s.at = 0; return s; });
+        r.history = [{ t: Date.now(), name: "（管理员操作）" }].concat(r.history || []).slice(0, 10);
+      }, function () { renderUserDetail(); toast("已重置并记录历史"); });
+    });
   });
 
-  $("btn-admin-exit").addEventListener("click", function () {
-    renderMain();
-    show(viewMain);
-    if (!entry.disabled) { try { entry.focus(); } catch (e) {} }
-  });
+  // 确认弹窗
+  $("cf-yes").addEventListener("click", function () { var cb = cfCb; cfClose(); if (cb) cb(); });
+  $("cf-no").addEventListener("click", cfClose);
+  // 名字弹窗
+  $("np-ok").addEventListener("click", npOk);
+  $("np-input").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); npOk(); } });
+  $("np-cancel").addEventListener("click", npClose);
 
-  // 多设备共享
-  $("btn-share-start").addEventListener("click", function () {
-    shareStart(newRoom(), false);
-  });
-  $("btn-share-copy").addEventListener("click", function () {
-    var el = $("share-link");
-    var ok = false;
-    try {
-      el.removeAttribute("readonly");
-      el.select(); el.setSelectionRange(0, 999);
-      ok = document.execCommand("copy");
-      el.setAttribute("readonly", "readonly");
-    } catch (e) { ok = false; }
-    if (!ok && navigator.clipboard) {
-      navigator.clipboard.writeText(shareLink()).then(function () { toast("链接已复制"); },
-        function () { toast("请长按链接手动复制"); });
-      return;
-    }
-    toast(ok ? "链接已复制" : "请长按链接手动复制");
-  });
-  $("btn-share-stop").addEventListener("click", function () { shareStop(); });
-
-  // ---------- 事件绑定 ----------
-  entry.addEventListener("input", updateHint);
-  entry.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); submit(); } });
-  $("btn-sign").addEventListener("click", submit);
-  $("btn-stats").addEventListener("click", function () { renderStats(); show(viewStats); });
-  $("btn-back").addEventListener("click", function () { renderMain(); show(viewMain); });
-
-  $("btn-pass-ok").addEventListener("click", passOk);
-  $("pass-input").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); passOk(); } });
-  $("btn-pass-cancel").addEventListener("click", function () { renderMain(); show(viewMain); });
-
-  $("pw-ok").addEventListener("click", pwOk);
-  $("pw-input").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); pwOk(); } });
-  $("pw-cancel").addEventListener("click", pwClose);
-
-  // 隐藏入口：Ctrl + Shift + B
-  document.addEventListener("keydown", function (e) {
-    var k = e.key || "";
-    if (e.ctrlKey && e.shiftKey && (k === "B" || k === "b")) {
-      e.preventDefault();
-      if (viewAdmin.hidden) openPassScreen();
-      return;
-    }
-    if (e.key === "Escape" && !$("pwmodal").hidden) pwClose();
-  });
-
-  // 备用隐藏入口：连点页脚 5 次（防止某些浏览器吞掉 Ctrl+Shift+B）
-  var tapN = 0, tapT = 0;
-  $("footer").addEventListener("click", function () {
-    var now = Date.now();
-    tapN = (now - tapT < 1200) ? tapN + 1 : 1;
-    tapT = now;
-    if (tapN >= 5) { tapN = 0; openPassScreen(); }
-  });
-
-  // ---------- 启动 ----------
-  lockCd.textContent = String(Math.round(LOCK_MS / 1000));   // 锁定秒数与 LOCK_MS 保持一致
-  shareLoad();                       // 共享模式（?room=xxx 或本机上次开启过）
+  /* ================= 启动 ================= */
+  $("lock-cd").textContent = String(Math.round(LOCK_MS / 1000));
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}   // 先落盘，保证 uid 稳定
   renderMain();
   updateHint();
-  renderShareBar();
-  if (SHARE.on) shareStart(SHARE.room, true);
-  setInterval(function () { if (SHARE.on) renderShareBar(); }, 2000);   // 刷新“N 秒前”
-  if (lockActive()) {
-    lockSay.textContent = "签到进行中";
-    lockName.textContent = "请稍候";
-    applyLock();
-  }
-  setTimeout(function () { if (!entry.disabled && !lockActive()) { try { entry.focus(); } catch (e) {} } }, 150);
+  if (lockActive()) { $("lock-say").textContent = "签到进行中"; $("lock-name").textContent = "请稍候"; applyLock(); }
+  pullMine(function () {                     // 拉自己的数据（管理员偷偷改的这里会生效）
+    renderMain();
+    if (lockActive()) { $("lock-say").textContent = "签到进行中"; $("lock-name").textContent = "请稍候"; applyLock(); }
+    setTimeout(function () { if (!$("entry").disabled && !lockActive()) { try { $("entry").focus(); } catch (e) {} } }, 120);
+  });
+  syncTip();
 })();
 </script>
 </body>
