@@ -569,7 +569,7 @@
 
   function sharePayload() {
     return { t: Date.now(), dev: DEV_ID, ver: state.ver, enabled: state.enabled,
-             lockUntil: state.lockUntil, lockWho: LOCK_WHO, students: state.students };
+             students: state.students };   // 锁定（lockUntil/lockWho）只在各设备本机生效，不参与同步
   }
 
   function pushSoon() {                       // 合并密集改动后再推
@@ -601,8 +601,6 @@
     _suppressPush = true;
     try {
       state.enabled   = payload.enabled !== false;
-      state.lockUntil = (typeof payload.lockUntil === "number") ? payload.lockUntil : 0;
-      if (typeof payload.lockWho === "string") LOCK_WHO = payload.lockWho;
       if (typeof payload.ver === "number") state.ver = payload.ver;
       state.students  = payload.students.map(function (s) {
         return { id: String(s.id), name: String(s.name),
@@ -615,11 +613,7 @@
     SHARE.err = 0; SHARE.lastOk = Date.now();
     renderMain();
     if (!viewAdmin.hidden) renderAdmin();
-    applyLock();
-    if (lockActive() && LOCK_WHO) {
-      lockSay.textContent = "已有人签到，请稍候";
-      lockName.textContent = LOCK_WHO;
-    }
+    applyLock();               // 只反映【本机】自己的锁定，忽略远端锁定
     renderShareBar();
     return true;
   }
