@@ -48,6 +48,9 @@
   .toolbar{display:flex;gap:10px;margin-bottom:14px}
   .toolbar .btn{flex:1}
   .closed-tip{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:12px;padding:10px 12px;font-size:14px;margin-bottom:12px;text-align:center}
+  .share-bar{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;border-radius:12px;padding:9px 12px;font-size:13px;margin-bottom:12px;text-align:center}
+  .share-bar b{font-family:ui-monospace,Consolas,monospace}
+  .share-bar .bad{color:#b91c1c}
 
   ul.roster{list-style:none;margin:0;padding:0}
   ul.roster li{
@@ -130,6 +133,7 @@
     </div>
 
     <div id="closed-tip" class="closed-tip" hidden>签到已关闭，暂不能签到</div>
+    <div id="share-bar" class="share-bar" hidden>共享房间 <b id="share-room">—</b> · <span id="share-state">连接中…</span></div>
 
     <div class="card">
       <div class="input-label">签到输入 <small>（数字＝学号后两位，汉字＝姓名）</small></div>
@@ -214,6 +218,23 @@
       <div class="sec-title">危险操作 <span class="note">（需重新输入密码）</span></div>
       <button class="btn danger block" id="btn-reset" style="margin-top:0">重置学生状态（全部改为未到）</button>
       <div class="note">重置后所有同学的标记都会回到「未到」；开启 / 关闭签到的设置不受影响。</div>
+    </div>
+
+    <div class="card">
+      <div class="sec-title">多设备共享 <span class="note">（可选 · 免注册）</span></div>
+      <div id="share-off">
+        <div class="note" style="margin-top:0">开启后把共享链接发到班群，其他手机 / 平板打开就是<b>同一份名单</b>：谁签到、谁请假、2 秒锁定都跨设备同步（需联网；断网时自动退回本机数据，不影响签到）。</div>
+        <button class="btn block" id="btn-share-start">生成共享房间</button>
+      </div>
+      <div id="share-on" hidden>
+        <div class="note" style="margin-top:0">共享房间：<b id="share-room2">—</b></div>
+        <input id="share-link" type="text" readonly style="width:100%;font-size:13px;padding:9px;border:2px solid #d7dae0;border-radius:9px;margin-top:6px">
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button class="btn ghost" id="btn-share-copy" style="flex:1">复制共享链接</button>
+          <button class="btn warn" id="btn-share-stop" style="flex:1">停止共享</button>
+        </div>
+        <div class="note" id="share-note"></div>
+      </div>
     </div>
 
     <button class="btn block" id="btn-admin-exit">退 出 管 理，返 回 签 到</button>
@@ -303,6 +324,7 @@
 
   function save() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+    if (SHARE.on && !_suppressPush) pushSoon();     // 共享模式下：本地任何改动都会自动同步出去
   }
 
   var STATUS_TEXT = { present: "已到", absent: "未到", leave: "请假" };
@@ -426,6 +448,7 @@
 
   function doLock(name, say, ms) {
     state.lockUntil = Date.now() + ms;
+    LOCK_WHO = name;
     save();
     lockSay.textContent = say;
     lockName.textContent = name;
@@ -496,6 +519,12 @@
       return;
     }
     if (lockActive()) return;
+    if (SHARE.on) { pullLatest(doSubmit); }   // 共享模式：先对齐最新状态再判定，降低跨设备抢签
+    else { doSubmit(); }
+  }
+
+  function doSubmit() {
+    if (lockActive()) return;                 // 拉取后可能被别人锁住/关闭签到
     if (!state.enabled) { toast("签到已关闭"); return; }
     var raw = entry.value;
     var r = findStudent(raw);
@@ -517,6 +546,188 @@
     entry.value = "";
     renderMain();
     doLock(label(st), "签到成功", LOCK_MS);
+  }
+
+  // ---------- 多设备共享（ntfy.sh 免注册通道，SSE 实时推送） ----------
+  var SHARE_KEY = "signin106_share_v1";
+  var DEV_ID = Math.random().toString(36).slice(2, 8);
+  var SHARE = { on: false, room: "", key: "", es: null, err: 0, lastOk: 0, esOpen: false };
+  var _suppressPush = false;
+  var LOCK_WHO = "";                        // 最近一次锁定是谁造成的（跨设备显示用）
+
+  function shareSave() {
+    try { localStorage.setItem(SHARE_KEY, JSON.stringify({ on: SHARE.on, room: SHARE.room })); } catch (e) {}
+  }
+  function shareTopic() { return "signin106-" + SHARE.room; }
+  function shareLink() { return location.origin + location.pathname + "?room=" + SHARE.room; }
+  function newRoom() {
+    var a = "abcdefghjkmnpqrstuvwxyz23456789", s = "";
+    for (var i = 0; i < 6; i++) s += a.charAt(Math.floor(Math.random() * a.length));
+    return s;
+  }
+  function msgKey(m) { return ("000000000000" + m.time).slice(-12) + "|" + String(m.id || ""); }
+
+  function sharePayload() {
+    return { t: Date.now(), dev: DEV_ID, ver: state.ver, enabled: state.enabled,
+             lockUntil: state.lockUntil, lockWho: LOCK_WHO, students: state.students };
+  }
+
+  function pushSoon() {                       // 合并密集改动后再推
+    if (!SHARE.on) return;
+    clearTimeout(pushSoon._t);
+    pushSoon._t = setTimeout(publish, 150);
+  }
+
+  function publish() {
+    if (!SHARE.on) return Promise.resolve(false);
+    return fetch("https://ntfy.sh/" + shareTopic(), {
+      method: "POST", headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(sharePayload()), cache: "no-store"
+    }).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function (m) {
+      if (m && m.id) { var k = msgKey(m); if (k > SHARE.key) SHARE.key = k; }
+      SHARE.err = 0; SHARE.lastOk = Date.now(); renderShareBar();
+      return true;
+    }).catch(function () {
+      SHARE.err++; renderShareBar();
+      return false;
+    });
+  }
+
+  function adopt(payload, key) {              // 用远端状态覆盖本机
+    if (!payload || !Array.isArray(payload.students)) return false;
+    _suppressPush = true;
+    try {
+      state.enabled   = payload.enabled !== false;
+      state.lockUntil = (typeof payload.lockUntil === "number") ? payload.lockUntil : 0;
+      if (typeof payload.lockWho === "string") LOCK_WHO = payload.lockWho;
+      if (typeof payload.ver === "number") state.ver = payload.ver;
+      state.students  = payload.students.map(function (s) {
+        return { id: String(s.id), name: String(s.name),
+                 status: (s.status === "present" || s.status === "leave") ? s.status : "absent",
+                 at: (typeof s.at === "number") ? s.at : 0 };
+      });
+      save();
+    } finally { _suppressPush = false; }
+    if (key) SHARE.key = key;
+    SHARE.err = 0; SHARE.lastOk = Date.now();
+    renderMain();
+    if (!viewAdmin.hidden) renderAdmin();
+    applyLock();
+    if (lockActive() && LOCK_WHO) {
+      lockSay.textContent = "已有人签到，请稍候";
+      lockName.textContent = LOCK_WHO;
+    }
+    renderShareBar();
+    return true;
+  }
+
+  function lastMessage(txt) {
+    var last = null;
+    String(txt || "").split("\n").forEach(function (line) {
+      line = line.trim(); if (!line) return;
+      try { var m = JSON.parse(line); if (m && m.event === "message") last = m; } catch (e) {}
+    });
+    return last;
+  }
+
+  function pullLatest(cb) {                   // 判定签到前先对齐一次最新状态
+    if (!SHARE.on) { cb(); return; }
+    fetch("https://ntfy.sh/" + shareTopic() + "/json?poll=1", { cache: "no-store" })
+      .then(function (r) { return r.text(); })
+      .then(function (txt) {
+        var last = lastMessage(txt);
+        if (last && msgKey(last) > SHARE.key) {
+          try { adopt(JSON.parse(last.message), msgKey(last)); } catch (e) {}
+        }
+        SHARE.err = 0; SHARE.lastOk = Date.now();
+      })
+      .catch(function () { SHARE.err++; })
+      .then(function () { renderShareBar(); cb(); });
+  }
+
+  function startSSE() {
+    if (!SHARE.on) return;
+    if (SHARE.es) { try { SHARE.es.close(); } catch (e) {} SHARE.es = null; }
+    try {
+      var es = new EventSource("https://ntfy.sh/" + shareTopic() + "/sse");
+      SHARE.es = es;
+      es.onopen = function () { SHARE.err = 0; SHARE.esOpen = true; SHARE.lastOk = Date.now(); renderShareBar(); };
+      es.onmessage = function (ev) {
+        SHARE.err = 0; SHARE.lastOk = Date.now();
+        try {
+          var m = JSON.parse(ev.data);
+          if (m && m.event === "message") {
+            var k = msgKey(m);
+            if (k > SHARE.key) adopt(JSON.parse(m.message), k);
+          }
+        } catch (e) {}
+        renderShareBar();
+      };
+      es.onerror = function () { SHARE.esOpen = false; SHARE.err++; renderShareBar(); };   // EventSource 会自动重连
+    } catch (e) { SHARE.err++; renderShareBar(); }
+  }
+
+  function shareStart(room, quiet) {
+    SHARE.room = room; SHARE.on = true; shareSave();
+    renderShareBar();
+    fetch("https://ntfy.sh/" + shareTopic() + "/json?poll=1", { cache: "no-store" })
+      .then(function (r) { return r.text(); })
+      .then(function (txt) {
+        var last = lastMessage(txt);
+        if (last) { try { adopt(JSON.parse(last.message), msgKey(last)); } catch (e) {} }
+        else { publish(); }                    // 服务端还没有 → 以本机名单为准
+        SHARE.err = 0; SHARE.lastOk = Date.now();
+        startSSE(); renderShareBar();
+        if (!quiet) toast("共享已开启 · 房间 " + room);
+      })
+      .catch(function () {
+        SHARE.err++; renderShareBar(); startSSE();
+        if (!quiet) toast("共享服务暂时连不上，先用本机数据");
+      });
+  }
+
+  function shareStop() {
+    if (SHARE.es) { try { SHARE.es.close(); } catch (e) {} SHARE.es = null; }
+    SHARE.on = false; SHARE.room = ""; SHARE.key = "";
+    SHARE.esOpen = false;
+    shareSave(); renderShareBar();
+    toast("已停止共享（本机名单保留）");
+  }
+
+  function renderShareBar() {
+    var bar = $("share-bar");
+    if (bar) bar.hidden = !SHARE.on;
+    if (SHARE.on) {
+      $("share-room").textContent = SHARE.room;
+      var st = $("share-state");
+      if (SHARE.err) st.innerHTML = '<span class="bad">同步异常，正在重试（本机仍可签到）</span>';
+      else if (SHARE.esOpen) st.textContent = "实时同步中";
+      else if (SHARE.lastOk) st.textContent = "已同步 · " + Math.max(0, Math.round((Date.now() - SHARE.lastOk) / 1000)) + " 秒前";
+      else st.textContent = "连接中…";
+    }
+    if ($("share-off")) {
+      $("share-off").hidden = SHARE.on;
+      $("share-on").hidden = !SHARE.on;
+    }
+    if (SHARE.on && $("share-link")) {
+      $("share-room2").textContent = SHARE.room;
+      $("share-link").value = shareLink();
+      $("share-note").textContent = SHARE.err
+        ? "最近一次同步失败，会自动重试；期间各设备仍可按本机数据签到。"
+        : "把上面的链接发到班群，其他手机打开即加入同一份名单。";
+    }
+  }
+
+  function shareLoad() {
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem(SHARE_KEY) || "null"); } catch (e) { s = null; }
+    var m = /[?&]room=([a-z0-9]{4,16})/i.exec(location.search);
+    if (m) { SHARE.room = m[1]; SHARE.on = true; shareSave(); }        // 从共享链接进来 → 直接加入
+    else if (s && s.on && s.room) { SHARE.room = s.room; SHARE.on = true; }
+    return SHARE.on;
   }
 
   // ---------- 密码 ----------
@@ -667,6 +878,28 @@
     if (!entry.disabled) { try { entry.focus(); } catch (e) {} }
   });
 
+  // 多设备共享
+  $("btn-share-start").addEventListener("click", function () {
+    shareStart(newRoom(), false);
+  });
+  $("btn-share-copy").addEventListener("click", function () {
+    var el = $("share-link");
+    var ok = false;
+    try {
+      el.removeAttribute("readonly");
+      el.select(); el.setSelectionRange(0, 999);
+      ok = document.execCommand("copy");
+      el.setAttribute("readonly", "readonly");
+    } catch (e) { ok = false; }
+    if (!ok && navigator.clipboard) {
+      navigator.clipboard.writeText(shareLink()).then(function () { toast("链接已复制"); },
+        function () { toast("请长按链接手动复制"); });
+      return;
+    }
+    toast(ok ? "链接已复制" : "请长按链接手动复制");
+  });
+  $("btn-share-stop").addEventListener("click", function () { shareStop(); });
+
   // ---------- 事件绑定 ----------
   entry.addEventListener("input", updateHint);
   entry.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); submit(); } });
@@ -704,8 +937,12 @@
 
   // ---------- 启动 ----------
   lockCd.textContent = String(Math.round(LOCK_MS / 1000));   // 锁定秒数与 LOCK_MS 保持一致
+  shareLoad();                       // 共享模式（?room=xxx 或本机上次开启过）
   renderMain();
   updateHint();
+  renderShareBar();
+  if (SHARE.on) shareStart(SHARE.room, true);
+  setInterval(function () { if (SHARE.on) renderShareBar(); }, 2000);   // 刷新“N 秒前”
   if (lockActive()) {
     lockSay.textContent = "签到进行中";
     lockName.textContent = "请稍候";
