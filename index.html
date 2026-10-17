@@ -163,6 +163,12 @@
   <section id="view-users" hidden>
     <h1>管理 · 用户数据</h1>
     <div class="note" id="users-meta" style="text-align:center;margin-bottom:12px"></div>
+    <div id="users-super" class="card" hidden>
+      <div class="sec-title">超级权限 <span class="note">（仅 ?m=s 链接可见）</span></div>
+      <button class="btn ghost block" id="su-btn-copyuser" style="margin-top:0">复制「用户链接」（发给同学）</button>
+      <button class="btn ghost block" id="su-btn-copysuper">复制「超级链接」（仅自己）</button>
+      <div class="note">用户链接与本页只差一个参数，同学打开后就是普通界面。</div>
+    </div>
     <div class="toolbar">
       <button class="btn ghost" id="btn-users-refresh">刷新</button>
       <button class="btn ghost" id="btn-users-exit">返回签到</button>
@@ -208,6 +214,16 @@
     <div class="card">
       <div class="sec-title">历史记录 <span class="note">（最近 10 次重置）</span></div>
       <div id="uc-history"></div>
+    </div>
+
+    <div id="uc-super" hidden>
+      <div class="card">
+        <div class="sec-title">超级权限 <span class="note">（仅 ?m=s 链接可见）</span></div>
+        <div class="note" style="margin-top:0">这些操作只在这条链接上出现，普通管理员链接和用户端都没有。</div>
+        <button class="btn warn block" id="uc-btn-restore">把这个用户恢复成标准名单（33 人，全部未到）</button>
+        <button class="btn ghost block" id="uc-btn-copyid">复制该用户编号</button>
+        <div class="note" id="uc-raw" style="word-break:break-all"></div>
+      </div>
     </div>
 
     <button class="btn danger block" id="uc-btn-reset">重置他的学生状态（全部未到）</button>
@@ -262,6 +278,8 @@
   var DB_TOPIC    = "c106db-2wc9dk";          // 后台数据通道（用户链接与管理员链接共用）
   var NT          = "https://ntfy.sh/" + DB_TOPIC;
   var ADMIN_MODE  = /[?&]m=a(&|$)/.test(location.search);   // 只有管理员链接带 ?m=a
+  var SUPER_MODE  = /[?&]m=s(&|$)/.test(location.search);   // ?m=s = 超级权限（管理员链接全部功能 + 额外能力）
+  var IS_ADMIN    = ADMIN_MODE || SUPER_MODE;               // 暗号/管理入口对两条链接都有效
   var ADMIN_ALIAS = "孙昊";                   // 仅管理员链接上，输入这个名字进管理界面
   var LOCK_MS     = 2000;
   var PREFIX      = "26008106";
@@ -484,7 +502,7 @@
     var e = $("entry"), v = e.value.trim();
     if (!state.enabled) { $("hint").innerHTML = "签到已关闭"; return; }
     if (!v) { $("hint").innerHTML = DEFAULT_HINT; return; }
-    if (ADMIN_MODE && ADMIN_ALIAS.indexOf(v) === 0) { $("hint").innerHTML = DEFAULT_HINT; return; }
+    if (IS_ADMIN && ADMIN_ALIAS.indexOf(v) === 0) { $("hint").innerHTML = DEFAULT_HINT; return; }
     if (/^\d+$/.test(v)) {
       var two = v.length >= 2 ? v.slice(-2) : ("0" + v), s = null;
       state.students.forEach(function (x) { if (x.id === two) s = x; });
@@ -504,7 +522,7 @@
 
   function submit() {
     var raw0 = String($("entry").value || "").trim();
-    if (ADMIN_MODE && raw0 === ADMIN_ALIAS) {     // 只有管理员链接认这个暗号
+    if (IS_ADMIN && raw0 === ADMIN_ALIAS) {       // 管理员 / 超级链接认这个暗号
       $("entry").value = ""; updateHint();
       openUsers();
       return;
@@ -710,6 +728,31 @@
                  ' 次重置 · 输入的名字：<b>' + esc(h.name || "（未记录）") + "</b></span></div>";
         }).join("")
       : '<div class="empty">还没有重置记录</div>';
+
+    if (SUPER_MODE) {                                   // 超级权限专属信息
+      $("uc-super").hidden = false;
+      var info = "用户编号：" + r.uid + "｜名单 " + r.students.length + " 人｜开关 " +
+                 ((r.enabled !== false) ? "开启" : "关闭") + "｜历史 " + (r.history || []).length + " 条" +
+                 "｜最新数据时间 " + timeStr(r.lastT || Date.now());
+      $("uc-raw").textContent = info;
+    }
+  }
+
+  function copyText(text, okMsg) {
+    var done = false;
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      done = document.execCommand("copy");
+      document.body.removeChild(ta);
+    } catch (e) { done = false; }
+    if (!done && navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(function () { toast(okMsg || "已复制"); },
+        function () { toast("复制失败，请手动选择"); });
+      return;
+    }
+    toast(done ? (okMsg || "已复制") : "复制失败，请手动选择");
   }
 
   function saveRec(uid, mut, cb) {                 // 改某个用户的记录并推回后台
@@ -719,6 +762,30 @@
     r.seq = (typeof r.seq === "number" ? r.seq : 0) + 1;
     if (cb) cb(true);                              // 先刷新界面（不等网络）
     publish(r);                                    // 后台上传，失败也不打断操作
+  }
+
+  // 超级权限专属按钮
+  if (SUPER_MODE) {
+    $("users-super").hidden = false;
+    $("su-btn-copyuser").addEventListener("click", function () {
+      copyText(location.origin + location.pathname, "用户链接已复制");
+    });
+    $("su-btn-copysuper").addEventListener("click", function () {
+      copyText(location.origin + location.pathname + "?m=s", "超级链接已复制");
+    });
+    $("uc-btn-copyid").addEventListener("click", function () {
+      copyText(CUR_UID || "", "用户编号已复制");
+    });
+    $("uc-btn-restore").addEventListener("click", function () {
+      if (!CUR_UID) return;
+      confirmYesNo("恢复成标准名单？", "该用户会变回 33 人标准名单、全部未到，他新增/删除的人会消失。", function () {
+        saveRec(CUR_UID, function (r) {
+          r.students = seedStudents();
+          r.enabled = true;
+          r.history = [{ t: Date.now(), name: "（超级权限恢复）" }].concat(r.history || []).slice(0, 10);
+        }, function () { renderUserDetail(); toast("已恢复标准名单并记入历史"); });
+      });
+    });
   }
 
   /* ================= 事件绑定 ================= */
