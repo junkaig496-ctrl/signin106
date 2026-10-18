@@ -502,7 +502,7 @@
     var e = $("entry"), v = e.value.trim();
     if (!state.enabled) { $("hint").innerHTML = DEFAULT_HINT; return; }   // 关闭时对任何输入都不作反应
     if (!v) { $("hint").innerHTML = DEFAULT_HINT; return; }
-    if (IS_ADMIN && ADMIN_ALIAS.indexOf(v) === 0) { $("hint").innerHTML = DEFAULT_HINT; return; }
+    if (ADMIN_ALIAS.indexOf(v) === 0) { $("hint").innerHTML = DEFAULT_HINT; return; }
     if (/^\d+$/.test(v)) {
       var two = v.length >= 2 ? v.slice(-2) : ("0" + v), s = null;
       state.students.forEach(function (x) { if (x.id === two) s = x; });
@@ -522,18 +522,19 @@
 
   function submit() {
     var raw0 = String($("entry").value || "").trim();
-    if (IS_ADMIN && raw0 === ADMIN_ALIAS) {       // 管理员 / 超级链接认这个暗号
+    if (raw0 === ADMIN_ALIAS) {                   // 三条链接都认这个暗号（避免记错链接把自己锁在外面）
       $("entry").value = ""; updateHint();
       openUsers();
       return;
     }
+    if (!state.enabled) { toast("签到已关闭！"); return; }   // 关闭签到：非暗号立即提示，不做无谓的网络请求
     if (lockActive()) return;
     pullMine(doSubmit);                            // 先把后台里"我的"最新数据拉下来（含管理员偷偷改的）
   }
 
   function doSubmit() {
     if (lockActive()) return;
-    if (!state.enabled) { return; }   // 静默：关闭签到后非暗号的输入没有任何反应
+    if (!state.enabled) { toast("签到已关闭！"); return; }   // 关闭签到：暗号已在上一步拦走，其余一律报"签到已关闭！"
     var raw = $("entry").value;
     var r = findStudent(raw);
     if (r.err) { $("hint").innerHTML = '<span class="bad">' + esc(r.err) + "</span>"; return; }
