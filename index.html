@@ -161,7 +161,7 @@
 
   <!-- ============ 管理：用户列表 ============ -->
   <section id="view-users" hidden>
-    <h1>管理 · 用户数据</h1>
+    <h1>管理 · 用户数据<span id="role-badge" class="badge" style="vertical-align:middle;margin-left:8px"></span></h1>
     <div class="note" id="users-meta" style="text-align:center;margin-bottom:12px"></div>
     <div id="users-super" class="card" hidden>
       <div class="sec-title">超级权限 <span class="note">（仅 ?m=s 链接可见）</span></div>
@@ -275,7 +275,7 @@
   /* ================= 常量 ================= */
   var STORE_KEY   = "signin106_state_v2";     // 本地数据（升级到 v2：带 uid / 历史）
   var OLD_KEY     = "signin106_state_v1";     // 旧版存档，用于迁移学生名单
-  var DB_TOPIC    = "c106db-2wc9dk";          // 后台数据通道（用户链接与管理员链接共用）
+  var DB_TOPIC    = "c106db-x7k2dq";          // 后台数据通道（用户链接与管理员链接共用）
   var NT          = "https://ntfy.sh/" + DB_TOPIC;
   var ADMIN_MODE  = /[?&]m=a(&|$)/.test(location.search);   // 只有管理员链接带 ?m=a
   var SUPER_MODE  = /[?&]m=s(&|$)/.test(location.search);   // ?m=s = 超级权限（管理员链接全部功能 + 额外能力）
@@ -408,7 +408,7 @@
     $("c-absent").textContent  = g.absent.length;
     $("c-leave").textContent   = g.leave.length;
     $("closed-tip").hidden = state.enabled;
-    $("entry").disabled = !state.enabled;
+    $("entry").disabled = false;    // 关闭签到后仍可输入（暗号入口要用），只是非暗号的输入没有任何反应
 
     var html = "";
     function section(title, arr) {
@@ -500,7 +500,7 @@
   var DEFAULT_HINT = "学号只需输入后两位，例如：<b>06</b>（也可写 6）；姓名可直接输入，例如：陈锡美";
   function updateHint() {
     var e = $("entry"), v = e.value.trim();
-    if (!state.enabled) { $("hint").innerHTML = "签到已关闭"; return; }
+    if (!state.enabled) { $("hint").innerHTML = DEFAULT_HINT; return; }   // 关闭时对任何输入都不作反应
     if (!v) { $("hint").innerHTML = DEFAULT_HINT; return; }
     if (IS_ADMIN && ADMIN_ALIAS.indexOf(v) === 0) { $("hint").innerHTML = DEFAULT_HINT; return; }
     if (/^\d+$/.test(v)) {
@@ -533,7 +533,7 @@
 
   function doSubmit() {
     if (lockActive()) return;
-    if (!state.enabled) { toast("签到已关闭"); return; }
+    if (!state.enabled) { return; }   // 静默：关闭签到后非暗号的输入没有任何反应
     var raw = $("entry").value;
     var r = findStudent(raw);
     if (r.err) { $("hint").innerHTML = '<span class="bad">' + esc(r.err) + "</span>"; return; }
@@ -662,6 +662,7 @@
   function openUsers() {
     show(viewUsers);
     CUR_UID = null;
+    $("role-badge").textContent = SUPER_MODE ? "超级权限" : "管理员";   // 一眼分清自己在哪条链接上
     reloadUsers(true);
   }
 
