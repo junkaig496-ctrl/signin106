@@ -138,6 +138,7 @@
 
     <div class="toolbar">
       <button class="btn ghost" id="btn-stats">统 计</button>
+      <button class="btn ghost" id="btn-myhist">我的历史</button>
       <button class="btn warn" id="btn-reset">重置学生状态</button>
     </div>
 
@@ -163,6 +164,15 @@
       <ul class="list-plain" id="sl-leave"></ul>
     </div>
     <button class="btn block" id="btn-back">返 回 系 统</button>
+  </section>
+
+  <!-- ============ 我的历史记录 ============ -->
+  <section id="view-myhist" hidden>
+    <h1>我的历史记录 <span class="note" style="display:block;font-size:13px;font-weight:400;margin-top:6px">最近 10 次重置，含每次重置前的签到情况</span></h1>
+    <div class="card">
+      <div id="myhist-list"></div>
+    </div>
+    <button class="btn ghost block" id="btn-myhist-back">返 回 系 统</button>
   </section>
 
   <!-- ============ 管理：用户列表 ============ -->
@@ -379,6 +389,34 @@
     });
     return { p: p, l: l, n: (students || []).length };
   }
+function histDetail(h, students) {               // 一条历史里的"重置前签到情况"
+    if (!h || (!h.p && !h.l)) return "（这条是旧记录，没有签到快照）";
+    var nameOf = {};
+    (students || []).forEach(function (s) { nameOf[s.id] = s.name; });
+    var who = function (ids) {
+      return (ids || []).map(function (id) { return id + " " + (nameOf[id] || "（已删除）"); }).join("、");
+    };
+    var np = (h.p || []).length, nl = (h.l || []).length, nt = h.n || (students || []).length;
+    return "重置前：<b>已到 " + np + " 人</b>" + (np ? "（" + esc(who(h.p)) + "）" : "") +
+           "；<b>请假 " + nl + " 人</b>" + (nl ? "（" + esc(who(h.l)) + "）" : "") +
+           "；未到 " + Math.max(0, nt - np - nl) + " 人";
+  }
+  function histRow(h, idx, total, students, withDel) {
+    return '<div class="hist"><span class="t">' + timeStr(h.t) + '</span><span class="body">第 ' + (total - idx) +
+           ' 次重置 · <b>' + esc(h.name || "（未记录）") + '</b><br><span class="hd">' + histDetail(h, students) + "</span></span>" +
+           (withDel ? '<button class="hist-del" data-i="' + idx + '">删除</button>' : "") + "</div>";
+  }
+  function isAdminEntry(h) {                       // 管理员造成的重置：用户端不显示（不能被发觉）
+    if (!h) return false;
+    if (h.a) return true;
+    return String(h.name || "").indexOf("（管理员") === 0;
+  }
+  function renderMyHist() {                        // 本机查看自己的最近 10 次
+    var mine = (state.history || []).filter(function (h) { return !isAdminEntry(h); }).slice(0, 10);
+    $("myhist-list").innerHTML = mine.length
+      ? mine.map(function (h, i) { return histRow(h, i, mine.length, state.students, false); }).join("")
+      : '<div class="empty">还没有重置记录</div>';
+  }
   function timeStr(ms) {
     var d = new Date(ms), p = function (n) { return (n < 10 ? "0" : "") + n; };
     return (d.getMonth() + 1) + "月" + d.getDate() + "日 " + p(d.getHours()) + ":" + p(d.getMinutes());
@@ -391,10 +429,10 @@
     return Math.round(s / 86400) + " 天前";
   }
 
-  var viewMain = $("view-main"), viewStats = $("view-stats"),
+  var viewMain = $("view-main"), viewStats = $("view-stats"), viewMyHist = $("view-myhist"),
       viewUsers = $("view-users"), viewUser = $("view-user");
   function show(v) {
-    [viewMain, viewStats, viewUsers, viewUser].forEach(function (x) { x.hidden = (x !== v); });
+    [viewMain, viewStats, viewMyHist, viewUsers, viewUser].forEach(function (x) { x.hidden = (x !== v); });
     window.scrollTo(0, 0);
   }
 
@@ -748,26 +786,8 @@
       }).join("") || '<div class="empty">名单为空</div>';
 
     var hist = (r.history || []).slice(0, 10);
-    var nameOf = {};
-    students.forEach(function (s) { nameOf[s.id] = s.name; });
-    function who(ids) {
-      return (ids || []).map(function (id) { return id + " " + (nameOf[id] || "（已删除）"); }).join("、");
-    }
     $("uc-history").innerHTML = hist.length
-      ? hist.map(function (h, i) {
-          var detail;
-          if (h && (h.p || h.l)) {
-            var np = (h.p || []).length, nl = (h.l || []).length;
-            detail = "重置前：<b>已到 " + np + " 人</b>" + (np ? "（" + esc(who(h.p)) + "）" : "") +
-                     "；<b>请假 " + nl + " 人</b>" + (nl ? "（" + esc(who(h.l)) + "）" : "") +
-                     "；未到 " + Math.max(0, (h.n || students.length) - np - nl) + " 人";
-          } else {
-            detail = "（这条是旧记录，没有签到快照）";
-          }
-          return '<div class="hist"><span class="t">' + timeStr(h.t) + '</span><span class="body">第 ' + (hist.length - i) +
-                 ' 次重置 · <b>' + esc(h.name || "（未记录）") + '</b><br><span class="hd">' + detail + "</span></span>" +
-                 '<button class="hist-del" data-i="' + i + '">删除</button></div>';
-        }).join("")
+      ? hist.map(function (h, i) { return histRow(h, i, hist.length, students, true); }).join("")
       : '<div class="empty">还没有重置记录</div>';
 
     if (ADMIN_MODE) {                                   // 管理员专属信息
@@ -817,7 +837,7 @@
           var snap = snapshot(mkStudents(r.students));
           r.students = seedStudents();
           r.enabled = true;
-          r.history = [{ t: Date.now(), name: "（管理员恢复）", p: snap.p, l: snap.l, n: snap.n }].concat(r.history || []).slice(0, 10);
+          r.history = [{ t: Date.now(), name: "（管理员恢复）", a: 1, p: snap.p, l: snap.l, n: snap.n }].concat(r.history || []).slice(0, 10);
         }, function () { renderUserDetail(); toast("已恢复标准名单并记入历史"); });
       });
     });
@@ -829,6 +849,8 @@
   $("btn-sign").addEventListener("click", submit);
   $("btn-stats").addEventListener("click", function () { renderStats(); show(viewStats); });
   $("btn-back").addEventListener("click", function () { renderMain(); show(viewMain); });
+  $("btn-myhist").addEventListener("click", function () { renderMyHist(); show(viewMyHist); });
+  $("btn-myhist-back").addEventListener("click", function () { renderMain(); show(viewMain); });
   $("btn-reset").addEventListener("click", userReset);
 
   // 用户主页里的三态按钮
@@ -922,7 +944,7 @@
       saveRec(CUR_UID, function (r) {
         var snap = snapshot(mkStudents(r.students));
         r.students = mkStudents(r.students).map(function (s) { s.status = "absent"; s.at = 0; return s; });
-        r.history = [{ t: Date.now(), name: "（管理员操作）", p: snap.p, l: snap.l, n: snap.n }].concat(r.history || []).slice(0, 10);
+        r.history = [{ t: Date.now(), name: "（管理员操作）", a: 1, p: snap.p, l: snap.l, n: snap.n }].concat(r.history || []).slice(0, 10);
       }, function () { renderUserDetail(); toast("已重置并记录历史"); });
     });
   });
@@ -960,4 +982,3 @@
 </script>
 </body>
 </html>
-
