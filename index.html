@@ -78,6 +78,8 @@
   .modal p{margin:0 0 12px;color:#6b7280;font-size:14px;line-height:1.6}
   .modal input{width:100%;font-size:18px;padding:12px;border:2px solid #d7dae0;border-radius:10px;outline:none;font-family:inherit;text-align:center}
   .modal input:focus{border-color:#2563eb}
+  .modal input + input{margin-top:10px}
+  .modal input::placeholder{font-size:15px;color:#9ca3af}
   .modal .row{display:flex;gap:10px;margin-top:12px}
   .modal .row .btn{flex:1}
   .modal .err{color:#dc2626;font-size:14px;margin-top:8px;min-height:20px;text-align:center}
@@ -256,6 +258,7 @@
   <div class="box">
     <h3 id="cf-title">确认操作</h3>
     <p id="cf-desc"></p>
+    <input id="cf-input" type="text" autocomplete="off" maxlength="20" hidden>
     <div class="row">
       <button class="btn ghost" id="cf-no">否</button>
       <button class="btn danger" id="cf-yes">是</button>
@@ -269,6 +272,7 @@
     <h3>重置学生状态</h3>
     <p>请输入你的名字（必须是名单里的姓名），这次重置会被记录下来。</p>
     <input id="np-input" type="text" autocomplete="off" placeholder="你的名字" maxlength="20">
+    <input id="np-label" type="text" autocomplete="off" placeholder="这次记录的名称（可选，如：9月28日早读）" maxlength="20">
     <div class="err" id="np-err"></div>
     <div class="row">
       <button class="btn ghost" id="np-cancel">取消</button>
@@ -403,7 +407,8 @@ function histDetail(h, students) {               // 一条历史里的"重置前
   }
   function histRow(h, idx, total, students, withDel) {
     return '<div class="hist"><span class="t">' + timeStr(h.t) + '</span><span class="body">第 ' + (total - idx) +
-           ' 次重置 · <b>' + esc(h.name || "（未记录）") + '</b><br><span class="hd">' + histDetail(h, students) + "</span></span>" +
+           ' 次重置 · <b>' + esc(h.name || "（未记录）") + "</b>" + (h.lb ? ' · 「' + esc(h.lb) + '」' : "") +
+           '<br><span class="hd">' + histDetail(h, students) + "</span></span>" +
            (withDel ? '<button class="hist-del" data-i="' + idx + '">删除</button>' : "") + "</div>";
   }
   function isAdminEntry(h) {                       // 管理员造成的重置：用户端不显示（不能被发觉）
@@ -674,7 +679,7 @@ function histDetail(h, students) {               // 一条历史里的"重置前
     npCb = cb;
     $("nameprompt").querySelector("h3").textContent = title || "重置学生状态";
     $("nameprompt").querySelector("p").textContent = desc || "请输入你的名字（必须是名单里的姓名）。";
-    $("np-input").value = ""; $("np-err").textContent = "";
+    $("np-input").value = ""; $("np-label").value = ""; $("np-err").textContent = "";
     $("nameprompt").hidden = false;
     setTimeout(function () { try { $("np-input").focus(); } catch (e) {} }, 60);
   }
@@ -686,15 +691,15 @@ function histDetail(h, students) {               // 一条历史里的"重置前
     if (!v) { $("np-err").textContent = "请输入你的名字"; return; }
     if (!hit) { $("np-err").textContent = "名单里没有「" + v + "」这个名字"; return; }
     var cb = npCb; npClose();
-    if (cb) cb(v);
+    if (cb) cb(v, $("np-label").value.trim());
   }
 
   function userReset() {
-    askName("重置学生状态", "请输入你的名字（必须是名单里的姓名），这次重置会被记录下来。", function (name) {
+    askName("重置学生状态", "请输入你的名字（必须是名单里的姓名），这次重置会被记录下来。", function (name, lb) {
       state.name = name;
       var snap = snapshot(state.students);
       state.students.forEach(function (s) { s.status = "absent"; s.at = 0; });
-      state.history.unshift({ t: Date.now(), name: name, p: snap.p, l: snap.l, n: snap.n });
+      state.history.unshift({ t: Date.now(), name: name, lb: lb || "", p: snap.p, l: snap.l, n: snap.n });
       state.history = state.history.slice(0, 10);
       state.lockUntil = 0;
       save(); renderMain();
@@ -704,10 +709,13 @@ function histDetail(h, students) {               // 一条历史里的"重置前
 
   /* ================= 是 / 否 确认 ================= */
   var cfCb = null;
-  function confirmYesNo(title, desc, cb) {
+  function confirmYesNo(title, desc, cb, placeholder) {   // placeholder 有值 → 弹窗里带一个"记录名称"输入框
     cfCb = cb;
     $("cf-title").textContent = title;
     $("cf-desc").textContent = desc || "";
+    $("cf-input").hidden = !placeholder;
+    $("cf-input").value = "";
+    if (placeholder) $("cf-input").placeholder = placeholder;
     $("confirm").hidden = false;
   }
   function cfClose() { $("confirm").hidden = true; cfCb = null; }
@@ -940,21 +948,26 @@ function histDetail(h, students) {               // 一条历史里的"重置前
 
   $("uc-btn-reset").addEventListener("click", function () {
     if (!CUR_UID) return;
-    confirmYesNo("重置他的学生状态？", "该用户所有同学都会变回「未到」，并记入一次历史记录。", function () {
+    confirmYesNo("重置他的学生状态？", "该用户所有同学都会变回「未到」，并记入一次历史记录。可以给这次记录起个名字：", function (lb) {
       saveRec(CUR_UID, function (r) {
         var snap = snapshot(mkStudents(r.students));
         r.students = mkStudents(r.students).map(function (s) { s.status = "absent"; s.at = 0; return s; });
-        r.history = [{ t: Date.now(), name: "（管理员操作）", a: 1, p: snap.p, l: snap.l, n: snap.n }].concat(r.history || []).slice(0, 10);
+        r.history = [{ t: Date.now(), name: "（管理员操作）", lb: lb || "", a: 1, p: snap.p, l: snap.l, n: snap.n }].concat(r.history || []).slice(0, 10);
       }, function () { renderUserDetail(); toast("已重置并记录历史"); });
-    });
+    }, "这次记录的名称（可选，如：9月28日早读）");
   });
 
   // 确认弹窗
-  $("cf-yes").addEventListener("click", function () { var cb = cfCb; cfClose(); if (cb) cb(); });
+  $("cf-yes").addEventListener("click", function () {
+    var cb = cfCb, lb = $("cf-input").hidden ? "" : $("cf-input").value.trim();
+    cfClose(); if (cb) cb(lb);
+  });
   $("cf-no").addEventListener("click", cfClose);
   // 名字弹窗
   $("np-ok").addEventListener("click", npOk);
   $("np-input").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); npOk(); } });
+  $("np-label").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); npOk(); } });
+  $("cf-input").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); $("cf-yes").click(); } });
   $("np-cancel").addEventListener("click", npClose);
 
   /* ================= 启动 ================= */
