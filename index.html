@@ -592,24 +592,49 @@ function histDetail(h, students) {               // 一条历史里的"重置前
       openUsers();
       return;
     }
-    if (!state.enabled) { toast("签到已关闭！"); return; }   // 关闭签到：非暗号立即提示，不做无谓的网络请求
+    if (!state.enabled) { toast("签到已关闭！"); return; }   // 本地已知关闭：立即提示
     if (lockActive()) return;
-    pullMine(doSubmit);                            // 先把后台里"我的"最新数据拉下来（含管理员偷偷改的）
+
+    // 本地优先：不等网络，先把这次签到做到界面上（挂锁、变色、清空输入）
+    var info = doSubmit(true);
+    if (!info) return;
+    var sent = false;
+    function sendOnce() { if (sent) return; sent = true; publish(mine()); }
+    // 后台核对：这次签到之前，后台是不是已经把签到关了？关了就把刚才这次签到回退掉
+    fetchAll(function () {
+      var r = RECS[state.uid];
+      if (r && (r.t || 0) > lastSyncT) {             // 后台有比本机更新的版本
+        if (r.enabled === false) {                   // 管理员在此期间关了签到 → 采用后台版本（这次签到随之撤销）
+          adoptRecord(r); renderMain(); toast("签到已关闭！");
+          sendOnce(); return;
+        }
+        adoptRecord(r);                              // 后台有管理员改过的数据：先采用
+        state.students.forEach(function (s) {        // 再把这次签到叠回去，免得白签
+          if (s.id === info.id && s.status !== "present") { s.status = "present"; s.at = Date.now(); }
+        });
+        renderMain();
+      }
+      sendOnce();
+    });
+    setTimeout(sendOnce, 3000);                     // 网络慢也别把数据丢了：3 秒兜底上传
   }
 
-  function doSubmit() {
-    if (lockActive()) return;
-    if (!state.enabled) { toast("签到已关闭！"); return; }   // 关闭签到：暗号已在上一步拦走，其余一律报"签到已关闭！"
+
+  function doSubmit(suppressPush) {                 // 返回本次签到的同学信息（供回退用）；suppressPush=true 时先不上传
+    if (lockActive()) return null;
+    if (!state.enabled) { toast("签到已关闭！"); return null; }
     var raw = $("entry").value;
     var r = findStudent(raw);
-    if (r.err) { $("hint").innerHTML = '<span class="bad">' + esc(r.err) + "</span>"; return; }
+    if (r.err) { $("hint").innerHTML = '<span class="bad">' + esc(r.err) + "</span>"; return null; }
     var st = r.s;
-    if (st.status === "present") { doLock(label(st), "已经签到过了", LOCK_MS); $("lock-say").textContent = "该同学已经签到过了"; return; }
-    if (st.status === "leave")   { doLock(label(st), "这位同学已请假", LOCK_MS); $("lock-say").textContent = "这位同学已请假"; return; }
+    if (st.status === "present") { doLock(label(st), "已经签到过了", LOCK_MS); $("lock-say").textContent = "该同学已经签到过了"; return null; }
+    if (st.status === "leave")   { doLock(label(st), "这位同学已请假", LOCK_MS); $("lock-say").textContent = "这位同学已请假"; return null; }
+    var info = { id: st.id, prev: st.status, prevAt: st.at || 0 };
     st.status = "present"; st.at = Date.now();
-    save();
+    if (suppressPush) { _suppressPush = true; save(); _suppressPush = false; } else { save(); }
     $("entry").value = ""; renderMain();
     doLock(label(st), "签到成功", LOCK_MS);
+    return info;
   }
 
   /* ================= 后台通道（ntfy，免注册） ================= */
@@ -678,20 +703,20 @@ function histDetail(h, students) {               // 一条历史里的"重置前
 
   var RECS = {};                                   // uid -> 记录
   var lastLocalAction = 0;                         // 本机最近一次改动时间（实时同步时不打扰用户操作）
+  function adoptRecord(r) {                         // 采用后台里"我的"版本（不触发上传）
+    _suppressPush = true;
+    state.enabled  = r.enabled !== false;
+    state.students = mkStudents(r.students);
+    state.history  = (r.history || []).slice(0, 10);
+    if (r.name) state.name = r.name;
+    if (r.f) state.firstSeen = r.f;
+    lastSyncT = r.t || 0;
+    save(); _suppressPush = false;
+  }
   function pullMine(cb) {                          // 把"我的"记录同步进来
     fetchAll(function () {
       var r = RECS[state.uid];
-      if (r && (r.t || 0) > lastSyncT) {
-        _suppressPush = true;
-        state.enabled  = r.enabled !== false;
-        state.students = mkStudents(r.students);
-        state.history  = (r.history || []).slice(0, 10);
-        if (r.name) state.name = r.name;
-        if (r.f) state.firstSeen = r.f;
-        lastSyncT = r.t || 0;
-        save(); _suppressPush = false;
-        renderMain();
-      }
+      if (r && (r.t || 0) > lastSyncT) { adoptRecord(r); renderMain(); }
       syncTip(); if (cb) cb();
     });
   }
@@ -1006,10 +1031,12 @@ function histDetail(h, students) {               // 一条历史里的"重置前
   renderMain();
   updateHint();
   if (lockActive()) { $("lock-say").textContent = "签到进行中"; $("lock-name").textContent = "请稍候"; applyLock(); }
-  pullMine(function () {                     // 拉自己的数据（管理员偷偷改的这里会生效）
+  // 先让界面可用：立刻聚焦输入框，不等网络
+  setTimeout(function () { if (!$("entry").disabled && !lockActive()) { try { $("entry").focus(); } catch (e) {} } }, 60);
+  // 后台再连：拉自己的数据（管理员偷偷改的这里会生效）+ 登记上线
+  pullMine(function () {
     renderMain();
     if (lockActive()) { $("lock-say").textContent = "签到进行中"; $("lock-name").textContent = "请稍候"; applyLock(); }
-    setTimeout(function () { if (!$("entry").disabled && !lockActive()) { try { $("entry").focus(); } catch (e) {} } }, 120);
     publish(mine());                         // 进页面就登记一次：管理员立刻能看到"有人在用"，不用等重置
   });
 
