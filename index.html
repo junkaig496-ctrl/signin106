@@ -581,14 +581,17 @@
       .catch(function () { SH.err++; syncTip(); return false; });
   }
 
+  var LAST_ID = "";                                // 增量拉取：只取这条之后的新消息（省流量）
   function fetchAll(cb) {                          // 拉全部记录，按 uid 取最新
-    fetch(NT + "/json?poll=1", { cache: "no-store" })
+    var u = NT + "/json?poll=1" + (LAST_ID ? "&since=" + encodeURIComponent(LAST_ID) : "");
+    fetch(u, { cache: "no-store" })
       .then(function (r) { return r.text(); })
       .then(function (txt) {
         txt.split("\n").forEach(function (line) {
           line = line.trim(); if (!line) return;
           var m; try { m = JSON.parse(line); } catch (e) { return; }
           if (!m || m.event !== "message") return;
+          if (m.id) LAST_ID = m.id;
           var rec; try { rec = JSON.parse(m.message); } catch (e) { return; }
           if (!rec || !rec.uid || !Array.isArray(rec.students)) return;
           var k = msgKey(m, rec), cur = RECS[rec.uid];
