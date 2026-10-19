@@ -121,12 +121,6 @@
   <section id="view-main">
     <h1>106班签到系统</h1>
 
-    <div class="counters">
-      <div class="counter on"><b id="c-present">0</b><span>已到</span></div>
-      <div class="counter off"><b id="c-absent">0</b><span>未到</span></div>
-      <div class="counter lv"><b id="c-leave">0</b><span>请假</span></div>
-    </div>
-
     <div id="closed-tip" class="closed-tip" hidden>签到已关闭，暂不能签到</div>
     <div id="sync-tip" class="sync-tip" hidden></div>
 
@@ -477,9 +471,6 @@ function histDetail(h, students) {               // 一条历史里的"重置前
 
   function renderMain() {
     var g = orderList(), n = state.students.length;
-    $("c-present").textContent = g.present.length;
-    $("c-absent").textContent  = g.absent.length;
-    $("c-leave").textContent   = g.leave.length;
     $("closed-tip").hidden = state.enabled;
     $("entry").disabled = false;    // 关闭签到后仍可输入（暗号入口要用），只是非暗号的输入没有任何反应
 
