@@ -28,7 +28,8 @@
   #entry{width:100%;font-size:24px;padding:14px;border:2px solid #d7dae0;border-radius:12px;outline:none;text-align:center;letter-spacing:2px;background:#fbfbfc;font-family:inherit}
   #entry:focus{border-color:#2563eb;background:#fff}
   #entry:disabled{background:#eef0f3;color:#8b909a}
-  .hint{margin-top:9px;min-height:22px;font-size:14px;color:#4b5563;text-align:center}
+  .hint{margin-top:9px;min-height:0;font-size:14px;color:#4b5563;text-align:center}
+  .hint:empty{margin-top:0;display:none}
   .hint .ok{color:#16a34a;font-weight:700}
   .hint .bad{color:#dc2626;font-weight:700}
   .hint .sid{font-weight:700;color:#2563eb}
@@ -125,10 +126,10 @@
     <div id="sync-tip" class="sync-tip" hidden></div>
 
     <div class="card">
-      <div class="input-label">签到输入 <small>（数字＝学号后两位，汉字＝姓名）</small></div>
+      <div class="input-label">签到输入</div>
       <input id="entry" type="text" inputmode="text" autocomplete="off" autocorrect="off"
              autocapitalize="off" spellcheck="false" placeholder="学号后两位 / 姓名" maxlength="20">
-      <div class="hint" id="hint">学号只需输入后两位，例如：<b>06</b>（也可写 6）</div>
+      <div class="hint" id="hint"></div>
       <button class="btn block" id="btn-sign">签 到</button>
     </div>
 
@@ -561,7 +562,7 @@ function histDetail(h, students) {               // 一条历史里的"重置前
     return { s: m[0] };
   }
 
-  var DEFAULT_HINT = "学号只需输入后两位，例如：<b>06</b>（也可写 6）；姓名可直接输入，例如：陈锡美";
+  var DEFAULT_HINT = "";   // 已按要求删除默认提示文案；输入时仍会显示匹配结果/错误原因
   function updateHint() {
     var e = $("entry"), v = e.value.trim();
     if (!state.enabled) { $("hint").innerHTML = DEFAULT_HINT; return; }   // 关闭时对任何输入都不作反应
