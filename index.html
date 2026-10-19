@@ -95,6 +95,11 @@
   .hist{padding:9px 0;border-bottom:1px solid #eef0f3;font-size:14px;display:flex;gap:8px;align-items:flex-start}
   .hist .t{color:#6b7280;font-size:13px;min-width:132px;flex-shrink:0}
   .hist .hd{display:block;margin-top:4px;color:#4b5563;font-size:13px;line-height:1.6}
+  .hist .body{flex:1;min-width:0}
+  .hist-del{flex-shrink:0;background:#fff;border:1px solid #fecaca;color:#dc2626;border-radius:8px;font-size:12px;padding:5px 9px;cursor:pointer;font-family:inherit}
+  .hist-del:active{background:#fef2f2}
+  .mini{border:1px solid #d7dae0;background:#fff;color:#6b7280;border-radius:7px;font-size:12px;padding:3px 8px;cursor:pointer;font-family:inherit;float:right;font-weight:400}
+  .mini.danger{border-color:#fecaca;color:#dc2626}
   .adm-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .adm-form input{font-family:inherit;font-size:16px;padding:11px;border:2px solid #d7dae0;border-radius:10px;outline:none;min-width:0;flex:1}
   .adm-form input:focus{border-color:#2563eb}
@@ -207,7 +212,9 @@
     </div>
 
     <div class="card">
-      <div class="sec-title">历史记录 <span class="note">（最近 10 次重置）</span></div>
+      <div class="sec-title">历史记录 <span class="note">（最近 10 次重置）</span>
+        <button class="mini danger" id="uc-btn-clear-hist">清空历史</button>
+      </div>
       <div id="uc-history"></div>
     </div>
 
@@ -741,8 +748,9 @@
           } else {
             detail = "（这条是旧记录，没有签到快照）";
           }
-          return '<div class="hist"><span class="t">' + timeStr(h.t) + '</span><span>第 ' + (hist.length - i) +
-                 ' 次重置 · <b>' + esc(h.name || "（未记录）") + '</b><br><span class="hd">' + detail + "</span></span></div>";
+          return '<div class="hist"><span class="t">' + timeStr(h.t) + '</span><span class="body">第 ' + (hist.length - i) +
+                 ' 次重置 · <b>' + esc(h.name || "（未记录）") + '</b><br><span class="hd">' + detail + "</span></span>" +
+                 '<button class="hist-del" data-i="' + i + '">删除</button></div>';
         }).join("")
       : '<div class="empty">还没有重置记录</div>';
 
@@ -870,6 +878,25 @@
     saveRec(CUR_UID, function (r) { r.enabled = on; }, function () {
       $("uc-enabled-text").textContent = on ? "开启签到" : "关闭签到";
       toast(on ? "已为他开启签到" : "已为他关闭签到（标记不变）");
+    });
+  });
+
+  // 删除单条历史 / 清空历史
+  $("uc-history").addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest("button[data-i]") : null;
+    if (!b || !CUR_UID) return;
+    var i = parseInt(b.getAttribute("data-i"), 10);
+    if (isNaN(i)) return;
+    confirmYesNo("删除这条历史记录？", "只删这一条，删除后无法恢复。", function () {
+      saveRec(CUR_UID, function (r) { (r.history || []).splice(i, 1); },
+        function () { renderUserDetail(); toast("已删除这条历史记录"); });
+    });
+  });
+  $("uc-btn-clear-hist").addEventListener("click", function () {
+    if (!CUR_UID) return;
+    confirmYesNo("清空该用户的全部历史？", "该用户的所有重置记录都会被删除，无法恢复。", function () {
+      saveRec(CUR_UID, function (r) { r.history = []; },
+        function () { renderUserDetail(); toast("历史记录已清空"); });
     });
   });
 
