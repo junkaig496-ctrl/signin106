@@ -92,8 +92,9 @@
   .usr .cnt{font-size:13px;color:#6b7280;text-align:right}
   .usr .box{width:22px;color:#c3c8d0;text-align:right}
   .badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:6px;font-size:11px;padding:1px 5px;margin-left:6px;font-weight:600}
-  .hist{padding:9px 0;border-bottom:1px solid #eef0f3;font-size:14px;display:flex;gap:8px}
-  .hist .t{color:#6b7280;font-size:13px;min-width:132px}
+  .hist{padding:9px 0;border-bottom:1px solid #eef0f3;font-size:14px;display:flex;gap:8px;align-items:flex-start}
+  .hist .t{color:#6b7280;font-size:13px;min-width:132px;flex-shrink:0}
+  .hist .hd{display:block;margin-top:4px;color:#4b5563;font-size:13px;line-height:1.6}
   .adm-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .adm-form input{font-family:inherit;font-size:16px;padding:11px;border:2px solid #d7dae0;border-radius:10px;outline:none;min-width:0;flex:1}
   .adm-form input:focus{border-color:#2563eb}
@@ -363,6 +364,14 @@
   }
   function num(st) { return PREFIX + st.id; }
   function label(st) { return st.id + " " + st.name; }
+  function snapshot(students) {          // 记录"重置前"的签到情况（只存学号后两位，控制消息体积）
+    var p = [], l = [];
+    (students || []).forEach(function (s) {
+      if (s.status === "present") p.push(s.id);
+      else if (s.status === "leave") l.push(s.id);
+    });
+    return { p: p, l: l, n: (students || []).length };
+  }
   function timeStr(ms) {
     var d = new Date(ms), p = function (n) { return (n < 10 ? "0" : "") + n; };
     return (d.getMonth() + 1) + "月" + d.getDate() + "日 " + p(d.getHours()) + ":" + p(d.getMinutes());
@@ -629,8 +638,9 @@
   function userReset() {
     askName("重置学生状态", "请输入你的名字（必须是名单里的姓名），这次重置会被记录下来。", function (name) {
       state.name = name;
+      var snap = snapshot(state.students);
       state.students.forEach(function (s) { s.status = "absent"; s.at = 0; });
-      state.history.unshift({ t: Date.now(), name: name });
+      state.history.unshift({ t: Date.now(), name: name, p: snap.p, l: snap.l, n: snap.n });
       state.history = state.history.slice(0, 10);
       state.lockUntil = 0;
       save(); renderMain();
@@ -715,10 +725,24 @@
       }).join("") || '<div class="empty">名单为空</div>';
 
     var hist = (r.history || []).slice(0, 10);
+    var nameOf = {};
+    students.forEach(function (s) { nameOf[s.id] = s.name; });
+    function who(ids) {
+      return (ids || []).map(function (id) { return id + " " + (nameOf[id] || "（已删除）"); }).join("、");
+    }
     $("uc-history").innerHTML = hist.length
       ? hist.map(function (h, i) {
+          var detail;
+          if (h && (h.p || h.l)) {
+            var np = (h.p || []).length, nl = (h.l || []).length;
+            detail = "重置前：<b>已到 " + np + " 人</b>" + (np ? "（" + esc(who(h.p)) + "）" : "") +
+                     "；<b>请假 " + nl + " 人</b>" + (nl ? "（" + esc(who(h.l)) + "）" : "") +
+                     "；未到 " + Math.max(0, (h.n || students.length) - np - nl) + " 人";
+          } else {
+            detail = "（这条是旧记录，没有签到快照）";
+          }
           return '<div class="hist"><span class="t">' + timeStr(h.t) + '</span><span>第 ' + (hist.length - i) +
-                 ' 次重置 · 输入的名字：<b>' + esc(h.name || "（未记录）") + "</b></span></div>";
+                 ' 次重置 · <b>' + esc(h.name || "（未记录）") + '</b><br><span class="hd">' + detail + "</span></span></div>";
         }).join("")
       : '<div class="empty">还没有重置记录</div>';
 
@@ -766,9 +790,10 @@
       if (!CUR_UID) return;
       confirmYesNo("恢复成标准名单？", "该用户会变回 33 人标准名单、全部未到，他新增/删除的人会消失。", function () {
         saveRec(CUR_UID, function (r) {
+          var snap = snapshot(mkStudents(r.students));
           r.students = seedStudents();
           r.enabled = true;
-          r.history = [{ t: Date.now(), name: "（管理员恢复）" }].concat(r.history || []).slice(0, 10);
+          r.history = [{ t: Date.now(), name: "（管理员恢复）", p: snap.p, l: snap.l, n: snap.n }].concat(r.history || []).slice(0, 10);
         }, function () { renderUserDetail(); toast("已恢复标准名单并记入历史"); });
       });
     });
@@ -852,8 +877,9 @@
     if (!CUR_UID) return;
     confirmYesNo("重置他的学生状态？", "该用户所有同学都会变回「未到」，并记入一次历史记录。", function () {
       saveRec(CUR_UID, function (r) {
+        var snap = snapshot(mkStudents(r.students));
         r.students = mkStudents(r.students).map(function (s) { s.status = "absent"; s.at = 0; return s; });
-        r.history = [{ t: Date.now(), name: "（管理员操作）" }].concat(r.history || []).slice(0, 10);
+        r.history = [{ t: Date.now(), name: "（管理员操作）", p: snap.p, l: snap.l, n: snap.n }].concat(r.history || []).slice(0, 10);
       }, function () { renderUserDetail(); toast("已重置并记录历史"); });
     });
   });
@@ -882,3 +908,4 @@
 </script>
 </body>
 </html>
+
