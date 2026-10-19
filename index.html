@@ -164,10 +164,9 @@
     <h1>管理 · 用户数据<span id="role-badge" class="badge" style="vertical-align:middle;margin-left:8px"></span></h1>
     <div class="note" id="users-meta" style="text-align:center;margin-bottom:12px"></div>
     <div id="users-super" class="card" hidden>
-      <div class="sec-title">超级权限 <span class="note">（仅 ?m=s 链接可见）</span></div>
+      <div class="sec-title">管理工具</div>
       <button class="btn ghost block" id="su-btn-copyuser" style="margin-top:0">复制「用户链接」（发给同学）</button>
-      <button class="btn ghost block" id="su-btn-copysuper">复制「超级链接」（仅自己）</button>
-      <div class="note">用户链接与本页只差一个参数，同学打开后就是普通界面。</div>
+      <div class="note">本页（管理员链接）请自己收藏，不要发给同学；同学用上面这条用户链接。</div>
     </div>
     <div class="toolbar">
       <button class="btn ghost" id="btn-users-refresh">刷新</button>
@@ -218,8 +217,7 @@
 
     <div id="uc-super" hidden>
       <div class="card">
-        <div class="sec-title">超级权限 <span class="note">（仅 ?m=s 链接可见）</span></div>
-        <div class="note" style="margin-top:0">这些操作只在这条链接上出现，普通管理员链接和用户端都没有。</div>
+        <div class="sec-title">管理工具</div>
         <button class="btn warn block" id="uc-btn-restore">把这个用户恢复成标准名单（33 人，全部未到）</button>
         <button class="btn ghost block" id="uc-btn-copyid">复制该用户编号</button>
         <div class="note" id="uc-raw" style="word-break:break-all"></div>
@@ -278,9 +276,7 @@
   var DB_TOPIC    = "c106db-9wm3pk";          // 后台数据通道（用户链接与管理员链接共用）
   var NT          = "https://ntfy.sh/" + DB_TOPIC;
   var ADMIN_MODE  = /[?&]m=a(&|$)/.test(location.search);   // 只有管理员链接带 ?m=a
-  var SUPER_MODE  = /[?&]m=s(&|$)/.test(location.search);   // ?m=s = 超级权限（管理员链接全部功能 + 额外能力）
-  var IS_ADMIN    = ADMIN_MODE || SUPER_MODE;               // 暗号/管理入口对两条链接都有效
-  var ADMIN_ALIAS = "孙昊";                   // 仅管理员链接上，输入这个名字进管理界面
+  var ADMIN_ALIAS = "孙昊";                   // 仅管理员链接上生效；用户链接输这个名字只会"查无此人"
   var LOCK_MS     = 2000;
   var PREFIX      = "26008106";
   var ROSTER_VER   = 2;
@@ -502,7 +498,7 @@
     var e = $("entry"), v = e.value.trim();
     if (!state.enabled) { $("hint").innerHTML = DEFAULT_HINT; return; }   // 关闭时对任何输入都不作反应
     if (!v) { $("hint").innerHTML = DEFAULT_HINT; return; }
-    if (ADMIN_ALIAS.indexOf(v) === 0) { $("hint").innerHTML = DEFAULT_HINT; return; }
+    if (ADMIN_MODE && ADMIN_ALIAS.indexOf(v) === 0) { $("hint").innerHTML = DEFAULT_HINT; return; }
     if (/^\d+$/.test(v)) {
       var two = v.length >= 2 ? v.slice(-2) : ("0" + v), s = null;
       state.students.forEach(function (x) { if (x.id === two) s = x; });
@@ -522,7 +518,7 @@
 
   function submit() {
     var raw0 = String($("entry").value || "").trim();
-    if (raw0 === ADMIN_ALIAS) {                   // 三条链接都认这个暗号（避免记错链接把自己锁在外面）
+    if (ADMIN_MODE && raw0 === ADMIN_ALIAS) {     // 只有管理员链接认暗号（用户链接绝对不能进管理）
       $("entry").value = ""; updateHint();
       openUsers();
       return;
@@ -663,7 +659,7 @@
   function openUsers() {
     show(viewUsers);
     CUR_UID = null;
-    $("role-badge").textContent = SUPER_MODE ? "超级权限" : "管理员";   // 一眼分清自己在哪条链接上
+    $("role-badge").textContent = "管理员";
     reloadUsers(true);
   }
 
@@ -731,7 +727,7 @@
         }).join("")
       : '<div class="empty">还没有重置记录</div>';
 
-    if (SUPER_MODE) {                                   // 超级权限专属信息
+    if (ADMIN_MODE) {                                   // 管理员专属信息
       $("uc-super").hidden = false;
       var info = "用户编号：" + r.uid + "｜名单 " + r.students.length + " 人｜开关 " +
                  ((r.enabled !== false) ? "开启" : "关闭") + "｜历史 " + (r.history || []).length + " 条" +
@@ -766,14 +762,11 @@
     publish(r);                                    // 后台上传，失败也不打断操作
   }
 
-  // 超级权限专属按钮
-  if (SUPER_MODE) {
+  // 管理员专属按钮（只在管理员链接上出现）
+  if (ADMIN_MODE) {
     $("users-super").hidden = false;
     $("su-btn-copyuser").addEventListener("click", function () {
       copyText(location.origin + location.pathname, "用户链接已复制");
-    });
-    $("su-btn-copysuper").addEventListener("click", function () {
-      copyText(location.origin + location.pathname + "?m=s", "超级链接已复制");
     });
     $("uc-btn-copyid").addEventListener("click", function () {
       copyText(CUR_UID || "", "用户编号已复制");
@@ -784,7 +777,7 @@
         saveRec(CUR_UID, function (r) {
           r.students = seedStudents();
           r.enabled = true;
-          r.history = [{ t: Date.now(), name: "（超级权限恢复）" }].concat(r.history || []).slice(0, 10);
+          r.history = [{ t: Date.now(), name: "（管理员恢复）" }].concat(r.history || []).slice(0, 10);
         }, function () { renderUserDetail(); toast("已恢复标准名单并记入历史"); });
       });
     });
