@@ -327,7 +327,7 @@
 
   function save() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
-    if (!_suppressPush) pushSoon();
+    if (!_suppressPush) { lastLocalAction = Date.now(); pushSoon(); }
   }
 
   function load() {
@@ -564,9 +564,11 @@
     var q = (rec && typeof rec.seq === "number") ? rec.seq : 0;
     return ("0000000000000000" + t).slice(-16) + "|" + ("000" + q).slice(-4) + "|" + String(m.id || "");
   }
+  var lastSyncT = 0;                               // 最近一次采用/上传的数据时间：只采用"更新的"版本
   function mine() {
+    if (!state.firstSeen) state.firstSeen = Date.now();
     return { uid: state.uid, name: state.name || "", t: Date.now(), seq: ++SEQ, enabled: state.enabled,
-             students: state.students, history: state.history };
+             students: state.students, history: state.history, f: state.firstSeen };
   }
   function pushSoon() { clearTimeout(pushSoon._t); pushSoon._t = setTimeout(function () { publish(mine()); }, 200); }
 
@@ -574,7 +576,8 @@
     return fetch(NT, { method: "POST", headers: { "Content-Type": "text/plain" },
                        body: JSON.stringify(rec), cache: "no-store" })
       .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-      .then(function (m) { if (m && m.id) SH.key = msgKey(m, rec); SH.err = 0; SH.lastOk = Date.now(); syncTip(); return true; })
+      .then(function (m) { if (m && m.id) SH.key = msgKey(m, rec); SH.err = 0; SH.lastOk = Date.now();
+                           lastSyncT = Math.max(lastSyncT, rec.t || 0); syncTip(); return true; })
       .catch(function () { SH.err++; syncTip(); return false; });
   }
 
@@ -598,15 +601,18 @@
   }
 
   var RECS = {};                                   // uid -> 记录
+  var lastLocalAction = 0;                         // 本机最近一次改动时间（实时同步时不打扰用户操作）
   function pullMine(cb) {                          // 把"我的"记录同步进来
     fetchAll(function () {
       var r = RECS[state.uid];
-      if (r) {
+      if (r && (r.t || 0) > lastSyncT) {
         _suppressPush = true;
         state.enabled  = r.enabled !== false;
         state.students = mkStudents(r.students);
         state.history  = (r.history || []).slice(0, 10);
         if (r.name) state.name = r.name;
+        if (r.f) state.firstSeen = r.f;
+        lastSyncT = r.t || 0;
         save(); _suppressPush = false;
         renderMain();
       }
@@ -673,7 +679,14 @@
     CUR_UID = null;
     $("role-badge").textContent = "管理员";
     reloadUsers(true);
+    if (poolTimer) clearInterval(poolTimer);
+    poolTimer = setInterval(function () {           // 列表实时刷新：新用户一进来就能被发现
+      if (viewUsers.hidden || !viewUser.hidden) return;
+      reloadUsers(false);
+    }, 6000);
   }
+  var poolTimer = 0;
+  function stopPool() { if (poolTimer) { clearInterval(poolTimer); poolTimer = 0; } }
 
   function reloadUsers(first) {
     $("users-meta").textContent = "正在读取…";
@@ -688,7 +701,7 @@
       $("users-meta").textContent = "共 " + arr.length + " 个用户 · " + (SH.err ? "连接异常" : "数据来自后台通道");
       $("user-list").innerHTML = arr.map(function (r) {
         var g = orderList(mkStudents(r.students));
-        var nm = r.name ? esc(r.name) : "未命名用户";
+        var nm = r.name ? esc(r.name) : "未命名用户（未重置）";
         var me = (r.uid === state.uid) ? '<span class="badge">本机</span>' : "";
         return '<div class="usr" data-uid="' + esc(r.uid) + '">' +
           '<div class="nm">' + nm + me + '<small>' + esc(r.uid) + " · " + ago(r.lastT || 0) + "活动</small></div>" +
@@ -828,7 +841,7 @@
   });
 
   $("btn-users-refresh").addEventListener("click", function () { reloadUsers(false); });
-  $("btn-users-exit").addEventListener("click", function () { renderMain(); show(viewMain); });
+  $("btn-users-exit").addEventListener("click", function () { stopPool(); renderMain(); show(viewMain); });
   $("user-list").addEventListener("click", function (e) {
     var row = e.target.closest ? e.target.closest(".usr") : null;
     if (row) openUser(row.getAttribute("data-uid"));
@@ -929,7 +942,16 @@
     renderMain();
     if (lockActive()) { $("lock-say").textContent = "签到进行中"; $("lock-name").textContent = "请稍候"; applyLock(); }
     setTimeout(function () { if (!$("entry").disabled && !lockActive()) { try { $("entry").focus(); } catch (e) {} } }, 120);
+    publish(mine());                         // 进页面就登记一次：管理员立刻能看到"有人在用"，不用等重置
   });
+
+  // 用户端每 6 秒静默对齐一次后台：管理员改的数据会实时生效（用户正在操作时跳过，不打断）
+  setInterval(function () {
+    if (document.hidden || !$("lock").hidden) return;
+    if (Date.now() - lastLocalAction < 4000) return;
+    pullMine(function () {});
+  }, 6000);
+
   syncTip();
 })();
 </script>
