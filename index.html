@@ -163,11 +163,6 @@
   <section id="view-users" hidden>
     <h1>管理 · 用户数据<span id="role-badge" class="badge" style="vertical-align:middle;margin-left:8px"></span></h1>
     <div class="note" id="users-meta" style="text-align:center;margin-bottom:12px"></div>
-    <div id="users-super" class="card" hidden>
-      <div class="sec-title">管理工具</div>
-      <button class="btn ghost block" id="su-btn-copyuser" style="margin-top:0">复制「用户链接」（发给同学）</button>
-      <div class="note">本页（管理员链接）请自己收藏，不要发给同学；同学用上面这条用户链接。</div>
-    </div>
     <div class="toolbar">
       <button class="btn ghost" id="btn-users-refresh">刷新</button>
       <button class="btn ghost" id="btn-users-exit">返回签到</button>
@@ -764,10 +759,6 @@
 
   // 管理员专属按钮（只在管理员链接上出现）
   if (ADMIN_MODE) {
-    $("users-super").hidden = false;
-    $("su-btn-copyuser").addEventListener("click", function () {
-      copyText(location.origin + location.pathname, "用户链接已复制");
-    });
     $("uc-btn-copyid").addEventListener("click", function () {
       copyText(CUR_UID || "", "用户编号已复制");
     });
