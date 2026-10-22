@@ -180,6 +180,14 @@
       <button class="btn ghost" id="btn-users-refresh">刷新</button>
       <button class="btn ghost" id="btn-users-exit">返回签到</button>
     </div>
+    <div class="card" style="padding:12px 14px">
+      <div class="sec-title" style="margin-bottom:6px">本机存档 <span class="note" id="arch-note"></span></div>
+      <div class="toolbar" style="margin-top:8px">
+        <button class="btn ghost" id="btn-arch-export">导出存档</button>
+        <button class="btn ghost" id="btn-arch-import">导入存档</button>
+      </div>
+      <input type="file" id="arch-file" accept=".json,application/json" hidden>
+    </div>
     <div id="user-list"></div>
   </section>
 
@@ -680,6 +688,7 @@ function histDetail(h, students) {               // 一条历史里的"重置前
   }
 
   var LAST_ID = "";                                // 增量拉取：只取这条之后的新消息（省流量）
+  var archDirty = false;
   function fetchAll(cb) {                          // 拉全部记录，按 uid 取最新
     var u = NT + "/json?poll=1" + (LAST_ID ? "&since=" + encodeURIComponent(LAST_ID) : "");
     fetch(u, { cache: "no-store" })
@@ -693,15 +702,28 @@ function histDetail(h, students) {               // 一条历史里的"重置前
           var rec; try { rec = JSON.parse(m.message); } catch (e) { return; }
           if (!rec || !rec.uid || !Array.isArray(rec.students)) return;
           var k = msgKey(m, rec), cur = RECS[rec.uid];
-          if (!cur || k > cur.key) { rec.key = k; rec.lastT = rec.t || (m.time * 1000); RECS[rec.uid] = rec; }
+          if (!cur || k > cur.key) { rec.key = k; rec.lastT = rec.t || (m.time * 1000); RECS[rec.uid] = rec; archPut(rec); archDirty = true; }
         });
         SH.err = 0; SH.lastOk = Date.now();
+        if (archDirty) { archSave(); archDirty = false; }
         cb();
       })
       .catch(function () { SH.err++; cb(); });
   }
 
-  var RECS = {};                                   // uid -> 记录
+  var RECS = {};                                   // uid -> 记录（只含后台通道里还在 12 小时窗口内的）
+  // ---- 本机永久档案：后台通道只留 12 小时，这里长期保存"见过的每个用户"的最后一份记录 ----
+  var ARCH_KEY = "signin106_archive_v1";
+  var ARCH = {};
+  try { ARCH = JSON.parse(localStorage.getItem(ARCH_KEY) || "{}") || {}; } catch (e) { ARCH = {}; }
+  function archSave() { try { localStorage.setItem(ARCH_KEY, JSON.stringify(ARCH)); } catch (e) {} }
+  function archPut(r) {                            // 保留"更新"的那一份，返回是否有变化
+    if (!r || !r.uid || !Array.isArray(r.students)) return false;
+    if (!r.lastT) r.lastT = r.t || 0;                // 导入/存档的记录也要有"最后活动"时间
+    var old = ARCH[r.uid];
+    if (!old || (r.t || 0) >= (old.t || 0)) { ARCH[r.uid] = r; return true; }
+    return false;
+  }
   var lastLocalAction = 0;                         // 本机最近一次改动时间（实时同步时不打扰用户操作）
   function adoptRecord(r) {                         // 采用后台里"我的"版本（不触发上传）
     _suppressPush = true;
@@ -795,29 +817,42 @@ function histDetail(h, students) {               // 一条历史里的"重置前
   function reloadUsers(first) {
     $("users-meta").textContent = "正在读取…";
     fetchAll(function () {
-      var arr = Object.keys(RECS).map(function (k) { return RECS[k]; })
-        .sort(function (a, b) { return (b.lastT || 0) - (a.lastT || 0); });
+      var merged = {}, archOnly = 0;
+      Object.keys(ARCH).forEach(function (k) { merged[k] = ARCH[k]; });          // 先铺本机档案
+      Object.keys(RECS).forEach(function (k) {                                  // 再用后台活数据覆盖
+        var a = merged[k];
+        if (!a || (RECS[k].t || 0) >= (a.t || 0)) merged[k] = RECS[k];
+      });
+      var arr = Object.keys(merged).map(function (k) { return merged[k]; })
+        .sort(function (a, b) { return (b.lastT || b.t || 0) - (a.lastT || a.t || 0); });
+      var archNote = $("arch-note");
+      if (archNote) archNote.textContent = "（本机已长期保存 " + Object.keys(ARCH).length + " 人；后台通道只保留 12 小时）";
       if (!arr.length) {
         $("users-meta").textContent = "还没有任何用户数据（或服务暂时连不上）";
         $("user-list").innerHTML = "";
         return;
       }
-      $("users-meta").textContent = "共 " + arr.length + " 个用户 · " + (SH.err ? "连接异常" : "数据来自后台通道");
       $("user-list").innerHTML = arr.map(function (r) {
         var g = orderList(mkStudents(r.students));
         var nm = r.name ? esc(r.name) : "未命名用户（未重置）";
         var me = (r.uid === state.uid) ? '<span class="badge">本机</span>' : "";
+        var isArchOnly = !RECS[r.uid];
+        if (isArchOnly) archOnly++;
         return '<div class="usr" data-uid="' + esc(r.uid) + '">' +
-          '<div class="nm">' + nm + me + '<small>' + esc(r.uid) + " · " + ago(r.lastT || 0) + "活动</small></div>" +
+          '<div class="nm">' + nm + me + (isArchOnly ? '<span class="badge">存档</span>' : "") +
+          "<small>" + esc(r.uid) + " · " + ago(r.lastT || r.t || 0) + "活动</small></div>" +
           '<div class="cnt">已到 ' + g.present.length + " / " + r.students.length + "<br>历史 " + (r.history || []).length + " 条</div>" +
           '<div class="box">›</div></div>';
       }).join("");
+      $("users-meta").textContent = "共 " + arr.length + " 个用户" +
+        (archOnly ? "（其中 " + archOnly + " 个来自本机存档）" : "") + " · " + (SH.err ? "连接异常" : "已连接");
       if (first) toast("已加载 " + arr.length + " 个用户");
     });
   }
 
   function openUser(uid) {
     CUR_UID = uid;
+    if (!RECS[uid] && ARCH[uid]) RECS[uid] = ARCH[uid];   // 只在存档里的用户也能打开
     var r = RECS[uid];
     if (!r) { toast("该用户数据已过期"); return; }
     show(viewUser);
@@ -830,7 +865,7 @@ function histDetail(h, students) {               // 一条历史里的"重置前
     var students = mkStudents(r.students);
     var g = orderList(students);
     $("user-title").textContent = "用户：" + (r.name || "未命名");
-    $("user-meta").textContent = esc(r.uid) + " · 最后活动 " + ago(r.lastT || 0);
+    $("user-meta").textContent = esc(r.uid) + " · 最后活动 " + ago(r.lastT || r.t || 0);
     $("uc-present").textContent = g.present.length;
     $("uc-absent").textContent  = g.absent.length;
     $("uc-leave").textContent   = g.leave.length;
@@ -929,6 +964,36 @@ function histDetail(h, students) {               // 一条历史里的"重置前
   });
 
   $("btn-users-refresh").addEventListener("click", function () { reloadUsers(false); });
+
+  // 本机存档：导出 / 导入（防浏览器清数据、换设备）
+  $("btn-arch-export").addEventListener("click", function () {
+    var data = { app: "106签到系统", exportedAt: new Date().toISOString(), count: Object.keys(ARCH).length, records: ARCH };
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "106签到存档_" + new Date().toISOString().slice(0, 10) + ".json";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
+    toast("已导出 " + data.count + " 条存档");
+  });
+  $("btn-arch-import").addEventListener("click", function () { $("arch-file").click(); });
+  $("arch-file").addEventListener("change", function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function () {
+      try {
+        var d = JSON.parse(String(rd.result));
+        var list = (d && d.records) ? d.records : d;
+        var n = 0;
+        Object.keys(list || {}).forEach(function (k) { if (archPut(list[k])) n++; });
+        archSave(); reloadUsers(false);
+        toast("已导入 " + n + " 条存档");
+      } catch (err) { toast("文件格式不对"); }
+      e.target.value = "";
+    };
+    rd.readAsText(f);
+  });
   $("btn-users-exit").addEventListener("click", function () { stopPool(); renderMain(); show(viewMain); });
   $("user-list").addEventListener("click", function (e) {
     var row = e.target.closest ? e.target.closest(".usr") : null;
