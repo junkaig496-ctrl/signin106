@@ -182,6 +182,7 @@
     </div>
     <div class="card" style="padding:12px 14px">
       <div class="sec-title" style="margin-bottom:6px">本机存档 <span class="note" id="arch-note"></span></div>
+      <div class="note" id="cloud-note" style="margin:0 0 2px"></div>
       <div class="toolbar" style="margin-top:8px">
         <button class="btn ghost" id="btn-arch-export">导出存档</button>
         <button class="btn ghost" id="btn-arch-import">导入存档</button>
@@ -350,7 +351,7 @@
 
   function save() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
-    if (!_suppressPush) { lastLocalAction = Date.now(); pushSoon(); }
+    if (!_suppressPush) { lastLocalAction = Date.now(); pushSoon(); cloudPush(); }
   }
 
   function load() {
@@ -647,6 +648,76 @@ function histDetail(h, students) {               // 一条历史里的"重置前
 
   /* ================= 后台通道（ntfy，免注册） ================= */
   var SH = { err: 0, lastOk: 0, key: "" };
+
+  /* ===== 云端库：GitHub 私有数据仓库（永久保存，不再受 12 小时限制）=====
+     用 fine-grained token（只授权这一个仓库的 Contents: Read and write）填在下面。
+     留空 = 只用后台通道 + 本机存档（旧行为）。 */
+  var CLOUD = { repo: "junkaig496-ctrl/signin106-data", path: "data.json", token: "" };
+  var CLOUD_SHA = "", cloudTimer = 0;
+  function cloudOn() { return !!CLOUD.token; }
+  function cloudHeaders() { return { "Authorization": "Bearer " + CLOUD.token, "Accept": "application/vnd.github+json" }; }
+  function cloudUrl() { return "https://api.github.com/repos/" + CLOUD.repo + "/contents/" + CLOUD.path; }
+  function b64enc(str) {
+    var b = new TextEncoder().encode(str), s2 = "";
+    for (var i = 0; i < b.length; i++) s2 += String.fromCharCode(b[i]);
+    return btoa(s2);
+  }
+  function b64dec(b64) {
+    var bin = atob(String(b64).replace(/\s/g, "")), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+  function cloudPull(cb) {                        // 从云端库读全量记录，并入本机档案
+    if (!cloudOn()) { if (cb) cb(); return; }
+    fetch(cloudUrl() + "?t=" + Date.now(), { headers: cloudHeaders(), cache: "no-store" })
+      .then(function (r) {
+        if (r.status === 404) return null;
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (j) {
+        if (!j) { CLOUD_SHA = ""; if (cb) cb(); return; }
+        CLOUD_SHA = j.sha || CLOUD_SHA;
+        var doc = {};
+        try { doc = JSON.parse(b64dec(j.content || "")); } catch (e) { doc = {}; }
+        var recs = (doc && doc.records) || {}, mineNewest = null;
+        Object.keys(recs).forEach(function (k) {
+          var r = recs[k];
+          if (!r || !r.uid) return;
+          archPut(r);
+          if (!RECS[k] || (r.t || 0) > (RECS[k].t || 0)) RECS[k] = r;
+          if (r.uid === state.uid && (!mineNewest || (r.t || 0) > (mineNewest.t || 0))) mineNewest = r;
+        });
+        archSave();
+        if (mineNewest && (mineNewest.t || 0) > lastSyncT) { adoptRecord(mineNewest); renderMain(); }
+        syncTip(); if (cb) cb();
+      })
+      .catch(function () { if (cb) cb(); });
+  }
+  function cloudPush() {                          // 2.5 秒防抖：把本机档案整份写回云端库
+    if (!cloudOn()) return;
+    clearTimeout(cloudTimer);
+    cloudTimer = setTimeout(function () {
+      var recs = {};
+      Object.keys(ARCH).forEach(function (k) { recs[k] = ARCH[k]; });
+      var doc = { app: "106签到系统", updated: new Date().toISOString(), records: recs };
+      var payload = { message: "sync " + new Date().toISOString(), content: b64enc(JSON.stringify(doc)) };
+      if (CLOUD_SHA) payload.sha = CLOUD_SHA;
+      fetch(cloudUrl(), { method: "PUT", cache: "no-store",
+                          headers: Object.assign({ "Content-Type": "application/json" }, cloudHeaders()),
+                          body: JSON.stringify(payload) })
+        .then(function (r) {
+          if (r.status === 409) { CLOUD_SHA = ""; return cloudPull(cloudPush); }   // 别人刚写过：重取再写
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        })
+        .then(function (j) {
+          if (j && j.content && j.content.sha) CLOUD_SHA = j.content.sha;
+          SH.err = 0; SH.lastOk = Date.now();
+        })
+        .catch(function () { SH.err++; syncTip(); });
+    }, 2500);
+  }
   var SEQ = 0;
   // 排序键：优先用记录里的客户端毫秒时间 + 自增序号（同一秒内多次改动也能正确排序），
   // 不能用 ntfy 的 message id 兜底 —— 它同秒内不是时间序（踩过：历史 3 条被旧数据覆盖成 2 条）。
@@ -804,7 +875,7 @@ function histDetail(h, students) {               // 一条历史里的"重置前
     show(viewUsers);
     CUR_UID = null;
     $("role-badge").textContent = "管理员";
-    reloadUsers(true);
+    cloudPull(function () { reloadUsers(true); });
     if (poolTimer) clearInterval(poolTimer);
     poolTimer = setInterval(function () {           // 列表实时刷新：新用户一进来就能被发现
       if (viewUsers.hidden || !viewUser.hidden) return;
@@ -825,6 +896,8 @@ function histDetail(h, students) {               // 一条历史里的"重置前
       });
       var arr = Object.keys(merged).map(function (k) { return merged[k]; })
         .sort(function (a, b) { return (b.lastT || b.t || 0) - (a.lastT || a.t || 0); });
+      var cn = $("cloud-note");
+      if (cn) cn.textContent = cloudOn() ? "云端库：已启用（永久保存，多设备可见）" : "云端库：未启用（只靠本机存档）";
       var archNote = $("arch-note");
       if (archNote) archNote.textContent = "（本机已长期保存 " + Object.keys(ARCH).length + " 人；后台通道只保留 12 小时）";
       if (!arr.length) {
@@ -1102,7 +1175,10 @@ function histDetail(h, students) {               // 一条历史里的"重置前
   pullMine(function () {
     renderMain();
     if (lockActive()) { $("lock-say").textContent = "签到进行中"; $("lock-name").textContent = "请稍候"; applyLock(); }
-    publish(mine());                         // 进页面就登记一次：管理员立刻能看到"有人在用"，不用等重置
+    cloudPull(function () {                  // 再从云端库取一次（永久存档的那份）
+      publish(mine());                       // 进页面就登记一次：管理员立刻能看到"有人在用"
+      cloudPush();
+    });
   });
 
   // 用户端每 6 秒静默对齐一次后台：管理员改的数据会实时生效（用户正在操作时跳过，不打断）
